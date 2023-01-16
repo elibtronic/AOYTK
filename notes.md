@@ -16,3 +16,15 @@
 - Next Steps
   - TR to look at website for project, documentation and Topic Modelling (using iPi widgets)
   - SL to debug existing notebook, create analysis notebook
+
+## Jan 16
+
+- Demo of progress so far
+  - Creation of derivative
+- Discussion of how to encapsulate code?
+  - Python classes?
+  - 'Flat files'?
+
+- Next Steps
+  - SL will continue the derivative extraction workflow
+  - TR will continue on web development, first crack at using derivative for analysis
