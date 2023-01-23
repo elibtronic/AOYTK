@@ -28,3 +28,18 @@
 - Next Steps
   - SL will continue the derivative extraction workflow
   - TR will continue on web development, first crack at using derivative for analysis
+
+
+## Jan 23
+
+- Reviewing pySpark _error_, of lack of header, 
+- Main module is now object oriented, less **shananigans** required for the generative
+
+- Next Steps
+  - TR
+   - will see if pySpark thing is actually an error
+   - will provide an alternative WARC
+   - will look at **Derivative Notebook** to see if changes can be made
+  - SL
+   - provide pySpark details to TR
+   - further development
