@@ -1,24 +1,14 @@
 """ AOY-TK module. Provides functions and forms to simplify web-archive analysis. 
-
-
 """
 # AOY-TK Module
 import ipywidgets as widgets 
 import requests
 import os
+import pandas as pd
+import matplotlib as plt 
 
-# initialize the PySpark context
-import findspark
-findspark.init()
-import pyspark
-sc = pyspark.SparkContext()
-from pyspark.sql import SQLContext
-sqlContext = SQLContext(sc)
 
-# import the AUT (needs to be done after the PySpark set-up)
-from aut import * 
-from pyspark.sql.functions import col, desc
-
+# General purpose functions.
 def display_path_select(): 
     """Displays a text box to set the default path for reading / writing data
     """
@@ -81,97 +71,132 @@ def display_download_file():
     display(txt_url)
     display(btn_download)
 
-# a messy first guess at derivative generation
-def generate_derivative(source_file, output_folder, file_type="csv", text_filters=0):
-    """Create a text derivative file from the specified source file.
-
-    Create a text derivative from the specified W/ARC source file, using the output settings specified. 
-    Args: 
-        source_file: the path to the W/ARC file to generatet the derivative from 
-        output_folder: the name for the output folder to save the derivative into 
-                       (Note: this is currently a relative path, the folder will be created as a 
-                              sub-folder of the working folder)
-        file_type: the file format to save the produced derivative in. 
-                   Can be either "csv" or "parquet" 
-        text_filters: an integer representing which type of text filtering to apply to the generated derivative. 
-                      0 : return the complete text content of each webpage (with HTML tags removed)
-                      1 : return the complete text with HTTP headers removed 
-                      2 : return the text with the boilerplate removed (boilerplate includes nav bars etc) 
-    """ 
-    # create our WebArchive object from the W/ARC file
-    archive = WebArchive(sc, sqlContext, source_file)
-
-    # almost certainly there is a simpler way of doing this, but I don't know how to modularize out the text filtering options
-    if text_filters == 0: # all content
-        archive.webpages() \
-            .select("crawl_date", "domain", "url", remove_html("content")) \
-            .write \
-            .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
-            .format(file_type) \
-            .option("escape", "\"") \
-            .option("encoding", "utf-8") \
-            .save(output_folder)
-    elif text_filters == 1: # remove HTTP headers
-        archive.webpages() \
-            .select("crawl_date", "domain", "url", remove_html(remove_http_header("content"))) \
-            .write \
-            .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
-            .format(file_type) \
-            .option("escape", "\"") \
-            .option("encoding", "utf-8") \
-            .save(output_folder)
-    else: # remove boilerplate text
-        archive.webpages() \
-            .select("crawl_date", "domain", "url", extract_boilerplate(remove_http_header("content")).alias("content")) \
-            .write \
-            .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
-            .format(file_type) \
-            .option("escape", "\"") \
-            .option("encoding", "utf-8") \
-            .save(output_folder)
 
 
-def display_derivative_creation_options(): 
-    """ Displays a form to set options for derivative file creation. 
-
-    Displays 4 form elements to select: 
-    - any W/ARC file from within the defined working folder to create a derivative of
-    - desired type of derivative (i.e. what content to include in the derivative)
-    - the output folder for the derivative (will be created within the working directory)
-    - the desired output file type (csv or parquet)
-
-    Also displays a button which, on-click, will run generate_derivative(), 
-    passing in the settings specified in the form. 
-    """
-    # file picker for W/ARC files in the specified folder
-    data_files = [x for x in os.listdir(path) if x.endswith((".warc", ".arc", "warc.gz", ".arc.gz"))]
-    file_options = widgets.Dropdown(description="W/ARC file:", options =  data_files)
-    out_text = widgets.Text(description="Output folder:", value="output/")
-    format_choice = widgets.Dropdown(description="File type:",options=["csv", "parquet"], value="csv")
-    # text content choices 
-    content_options = ["All text content", "Text content without HTTP headers", "Text content without boilerplate"]
-    content_choice = widgets.Dropdown(description="Content:", options=content_options)
-    content_val = content_options.index(content_choice.value)
-    button = widgets.Button(description="Create derivative")
-
-    # this function is defined here in order to keep the other form elements 
-    # in-scope and therefore allow for the reading of their values
-    def btn_create_deriv(btn): 
-        """On-click function for the create derivative button. 
-
-        Retrieves the values from the other inputs on the form and passes them to 
-        generate_derivative() to create a derivative file using the selected settings. 
+class DerivativeGenerator: 
+    """Creates derivative files from W/ARCs. 
+    
+    This class contains all of the functions relating to derivative generation."""
+    def __init__(self):
+        """ Initialize the dependencies for creating derivatives.
         """
+        # initialize the PySpark context
+        import findspark
+        findspark.init()
+        import pyspark
+        self.sc = pyspark.SparkContext()
+        from pyspark.sql import SQLContext
+        self.sqlContext = SQLContext(self.sc)
+
+    # a messy first guess at derivative generation
+    def generate_derivative(self, source_file, output_folder, file_type="csv", text_filters=0):
+        """Create a text derivative file from the specified source file.
+
+        Create a text derivative from the specified W/ARC source file, using the output settings specified. 
+        Args: 
+            source_file: the path to the W/ARC file to generatet the derivative from 
+            output_folder: the name for the output folder to save the derivative into 
+                        (Note: this is currently a relative path, the folder will be created as a 
+                                sub-folder of the working folder)
+            file_type: the file format to save the produced derivative in. 
+                    Can be either "csv" or "parquet" 
+            text_filters: an integer representing which type of text filtering to apply to the generated derivative. 
+                        0 : return the complete text content of each webpage (with HTML tags removed)
+                        1 : return the complete text with HTTP headers removed 
+                        2 : return the text with the boilerplate removed (boilerplate includes nav bars etc) 
+        """ 
+        # import the AUT (needs to be done after the PySpark set-up)
+        from aut import WebArchive, remove_html, remove_http_header, extract_boilerplate
+        from pyspark.sql.functions import col, desc
+        
+        # create our WebArchive object from the W/ARC file
+        archive = WebArchive(self.sc, self.sqlContext, source_file)
+
+        if text_filters == 0: 
+            content = remove_html("content")
+        elif text_filters == 1: 
+            content = remove_html(remove_http_header("content"))
+        else: 
+            content = extract_boilerplate(remove_http_header("content")).alias("content")
+
+        archive.webpages() \
+            .select("crawl_date", "domain", "url", content) \
+            .write \
+            .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
+            .format(file_type) \
+            .option("escape", "\"") \
+            .option("encoding", "utf-8") \
+            .save(output_folder)
+
+        # rename the datafile to have a meaningful title, remove the success file
+        success = False
+        for f in os.scandir(output_folder): 
+            if f.path.split("/")[-1] == "_SUCCESS": 
+                # indicate that the derivative was generated successfully
+                success = True
+                # remove the success indicator file
+                os.remove(f.path)
+            if f.path.split(".")[-1] == file_type: 
+                source_file_name = source_file.split(".")[0]
+                source_file_name = source_file_name.split("/")[-1]
+                os.rename(f.path, output_folder + source_file_name + "." + file_type)
+        return success
+
+
+    def display_derivative_creation_options(self): 
+        """ Displays a form to set options for derivative file creation. 
+
+        Displays 4 form elements to select: 
+        - any W/ARC file from within the defined working folder to create a derivative of
+        - desired type of derivative (i.e. what content to include in the derivative)
+        - the output folder for the derivative (will be created within the working directory)
+        - the desired output file type (csv or parquet)
+
+        Also displays a button which, on-click, will run generate_derivative(), 
+        passing in the settings specified in the form. 
+        """
+        # file picker for W/ARC files in the specified folder
+        data_files = [x for x in os.listdir(path) if x.endswith((".warc", ".arc", "warc.gz", ".arc.gz"))]
+        file_options = widgets.Dropdown(description="W/ARC file:", options =  data_files)
+        out_text = widgets.Text(description="Output folder:", value="output/")
+        format_choice = widgets.Dropdown(description="File type:",options=["csv", "parquet"], value="csv")
+        # text content choices 
         content_options = ["All text content", "Text content without HTTP headers", "Text content without boilerplate"]
-        input_file = path + "/" + file_options.value
-        output_location = path + "/" + out_text.value
+        content_choice = widgets.Dropdown(description="Content:", options=content_options)
         content_val = content_options.index(content_choice.value)
-        print("Creating derivative file... (this may take several minutes)")
-        generate_derivative(input_file, output_location, format_choice.value, content_val)
-        print("Derivative generated, saved to: " + output_location)
-    button.on_click(btn_create_deriv)
-    display(file_options)
-    display(out_text)
-    display(format_choice)
-    display(content_choice)
-    display(button)
+        button = widgets.Button(description="Create derivative")
+
+        # this function is defined here in order to keep the other form elements 
+        # in-scope and therefore allow for the reading of their values
+        def btn_create_deriv(btn): 
+            """On-click function for the create derivative button. 
+
+            Retrieves the values from the other inputs on the form and passes them to 
+            generate_derivative() to create a derivative file using the selected settings. 
+            """
+            content_options = ["All text content", "Text content without HTTP headers", "Text content without boilerplate"]
+            input_file = path + "/" + file_options.value
+            output_location = path + "/" + out_text.value
+            content_val = content_options.index(content_choice.value)
+            print("Creating derivative file... (this may take several minutes)")
+            if self.generate_derivative(input_file, output_location, format_choice.value, content_val):
+                print("Derivative generated, saved to: " + output_location)
+            else: 
+                print("An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.")
+        button.on_click(btn_create_deriv)
+        display(file_options)
+        display(out_text)
+        display(format_choice)
+        display(content_choice)
+        display(button)
+
+
+class Analyzer: 
+    """ Tools for analyzing W/ARC derivatives.
+    """
+        
+    def load_data(self, filename):
+        """Load a datafile to work with. 
+        """
+        self.data = pd.read_csv()
+        
