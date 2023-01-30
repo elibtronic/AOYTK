@@ -2,11 +2,7 @@
 ![AOY_Logo](AOY_Logo.png)
 
 # All Our Yesterdays
-A toolkit to explore Web Archives
-
-## Purpose
-
-This utility is used for getting derivatives of WARC files into a structured Colab environment for analysis and further export. 
+A toolkit to explore Web Archives. For more information and an overview of the platform please watch a short [video]() on how it works.
 
 
 ## Preparation
@@ -35,5 +31,11 @@ Premade Notebooks to analyze different derivative types are outlined in the foll
 |File Formats|   |   |
 |    |    |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
 
+## Export
+
+If you don't like the Colab environment CSV representations of your data will be saved to the **Google Drive** so that you can download them to use in different tools.
+
 
 ![category types](category_types.png)
+
+**figure 1.**
