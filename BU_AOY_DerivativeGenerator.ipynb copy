@@ -1,0 +1,1283 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "dfmWMEzpp080"
+      },
+      "id": "dfmWMEzpp080",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "![AOY Logo](https://raw.githubusercontent.com/BrockDSL/AOYTK/main/AOY_Logo.png)\n",
+        "\n",
+        "All\n",
+        "Our\n",
+        "Yesterdays\n",
+        "\n",
+        "A toolkit to explore Web Archives\n",
+        "[Homepage](https://brockdsl.github.io/AOTYK)"
+      ],
+      "metadata": {
+        "id": "Zvgax_yFk9yp"
+      },
+      "id": "Zvgax_yFk9yp"
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "1b37d0db-647a-40d1-84d6-d447e181b7ec"
+      },
+      "source": [
+        "# AOY-TK User Notebook\n",
+        "\n",
+        "This notebook provides a simplified user interface for producing some basic text derivatives using the Archives Unleashed Toolkit (AUT). \n"
+      ],
+      "id": "1b37d0db-647a-40d1-84d6-d447e181b7ec"
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Mount Google Drive\n",
+        "\n",
+        "In order to persist working files / data across multiple runs of the notebook. "
+      ],
+      "metadata": {
+        "id": "a2WI_TYuJ3q0"
+      },
+      "id": "a2WI_TYuJ3q0"
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import drive \n",
+        "drive.mount(\"/content/drive/\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "O6vVQoqoJ3T8",
+        "outputId": "b8571333-626f-4043-d097-819e46f717b3"
+      },
+      "id": "O6vVQoqoJ3T8",
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mounted at /content/drive/\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "h99iKoZA5elB"
+      },
+      "source": [
+        "## Colab Setup Cells\n",
+        "The following cells download and install the dependencies required to run the AUT, and by extension, the AOY-TK. There is quite a bit to download and install so running these cells may take a few minutes. "
+      ],
+      "id": "h99iKoZA5elB"
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "Ka32HHaC4wEI"
+      },
+      "outputs": [],
+      "source": [
+        "# this cell downloads and installs the required dependencies for running the AUT\n",
+        "# and creates the environment variables required to use Java, Spark and PySpark\n",
+        "# this cell only needs to be run in Colab, when running this script from the Docker image\n",
+        "# these variables will already have been set appropriately\n",
+        "# create the appropriate environment variables to be able to use Java, Spark and PySpark\n",
+        "%%capture\n",
+        "!apt-get update\n",
+        "!apt-get install -y openjdk-11-jdk-headless -qq \n",
+        "!apt-get install maven -qq\n",
+        "\n",
+        "!curl -L \"https://archive.apache.org/dist/spark/spark-3.1.1/spark-3.1.1-bin-hadoop2.7.tgz\" > spark-3.1.1-bin-hadoop2.7.tgz\n",
+        "!tar -xvf spark-3.1.1-bin-hadoop2.7.tgz\n",
+        "!pip install -q findspark\n",
+        "\n",
+        "import os\n",
+        "os.environ[\"JAVA_HOME\"] = \"/usr/lib/jvm/java-1.11.0-openjdk-amd64\"\n",
+        "os.environ[\"SPARK_HOME\"] = \"spark-3.1.1-bin-hadoop2.7\"\n",
+        "os.environ['PYSPARK_SUBMIT_ARGS'] = '--jars aut-1.1.0-fatjar.jar --py-files aut-1.1.0.zip pyspark-shell'"
+      ],
+      "id": "Ka32HHaC4wEI"
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "fFj_MZXj5jCr"
+      },
+      "outputs": [],
+      "source": [
+        "# download the AUT \n",
+        "%%capture\n",
+        "!wget \"https://github.com/archivesunleashed/aut/releases/download/aut-1.1.0/aut-1.1.0.zip\"\n",
+        "!wget \"https://github.com/archivesunleashed/aut/releases/download/aut-1.1.0/aut-1.1.0-fatjar.jar\""
+      ],
+      "id": "fFj_MZXj5jCr"
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "## Workspace Setup and Getting Data\n",
+        "Before running the cell below, ensure that `aoytk.py` has been uploaded to the workspace."
+      ],
+      "metadata": {
+        "id": "t2rDJijpmGdg"
+      },
+      "id": "t2rDJijpmGdg"
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# import the toolkit\n",
+        "import aoytk"
+      ],
+      "metadata": {
+        "id": "Yzg35HoZi8BZ"
+      },
+      "id": "Yzg35HoZi8BZ",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# create a DerivativeGenerator object \n",
+        "dg = aoytk.DerivativeGenerator()"
+      ],
+      "metadata": {
+        "id": "vxoAuDwJ9fkJ"
+      },
+      "id": "vxoAuDwJ9fkJ",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "The following cell allows you to specify a working folder. All subsequent paths will be relative to this one. "
+      ],
+      "metadata": {
+        "id": "G2WZttGIjmo4"
+      },
+      "id": "G2WZttGIjmo4"
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 99,
+          "referenced_widgets": [
+            "eda0cfdde4de48bd8fab500f4c36e977",
+            "83c53f8ef5b24936800073d462eba5ba",
+            "ca05ecab01f047738abc530f5ae48e16",
+            "9594f86c4da146e7b2e97d8260a7271a",
+            "326165f442d1410883ff6cf2a63f04b7",
+            "4ebfce5342bd4c899f012ce12332345c"
+          ]
+        },
+        "id": "bbb05618-3dc2-4878-9dc6-5f810132accd",
+        "outputId": "6ce4e2c5-931c-4c0a-8f0c-b94caba58828"
+      },
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "Text(value='', description='Folder path:')"
+            ],
+            "application/vnd.jupyter.widget-view+json": {
+              "version_major": 2,
+              "version_minor": 0,
+              "model_id": "eda0cfdde4de48bd8fab500f4c36e977"
+            }
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "Button(description='Submit', style=ButtonStyle())"
+            ],
+            "application/vnd.jupyter.widget-view+json": {
+              "version_major": 2,
+              "version_minor": 0,
+              "model_id": "9594f86c4da146e7b2e97d8260a7271a"
+            }
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Folder path set to: /content/drive/MyDrive/AOY/\n"
+          ]
+        }
+      ],
+      "source": [
+        "# set the default path for reading/writing files (working directory)\n",
+        "aoytk.display_path_select()"
+      ],
+      "id": "bbb05618-3dc2-4878-9dc6-5f810132accd"
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "The following cell can be used to download W/ARC files from the given URL. Files will be saved in the working folder set in the previous cell. \n",
+        "\n",
+        "A sample W/ARC file can be found at the following URL: https://github.com/archivesunleashed/aut-resources/raw/master/Sample-Data/ARCHIVEIT-227-QUARTERLY-XUGECV-20091218231727-00039-crawling06.us.archive.org-8091.warc.gz"
+      ],
+      "metadata": {
+        "id": "wEI6NOLckIU2"
+      },
+      "id": "wEI6NOLckIU2"
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "2b0b2603-67b4-4121-a968-06494b67ccdc",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 81,
+          "referenced_widgets": [
+            "694de876419a46ff9006b533765468fd",
+            "f3d2ab74651047bd8ec1be056c279ccc",
+            "bd423484514e42cdac7bf3f1c21f33d2",
+            "4c3ad42f8cae4055b3150579858b2f80",
+            "60bf43941fda41ea8d4da34d609cbc1e",
+            "b0b3714cddfc4878b5c9da61a68d2e71"
+          ]
+        },
+        "outputId": "1e11b459-bea4-4fa3-a8ce-b371301a4008"
+      },
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "Text(value='', description='W/ARC URL: ')"
+            ],
+            "application/vnd.jupyter.widget-view+json": {
+              "version_major": 2,
+              "version_minor": 0,
+              "model_id": "694de876419a46ff9006b533765468fd"
+            }
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "Button(description='Download W/ARC', style=ButtonStyle())"
+            ],
+            "application/vnd.jupyter.widget-view+json": {
+              "version_major": 2,
+              "version_minor": 0,
+              "model_id": "4c3ad42f8cae4055b3150579858b2f80"
+            }
+          },
+          "metadata": {}
+        }
+      ],
+      "source": [
+        "# give the option to download file from a specified URL\n",
+        "aoytk.display_download_file()"
+      ],
+      "id": "2b0b2603-67b4-4121-a968-06494b67ccdc"
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "The following cell can be used to create text derivatives from the chosen W/ARC file. The derivative will be saved in the specified output folder. Note that the output folder name needs to be unique (Spark will not output a file to a folder that already exists / has content in it). The output folder path is relative to the working folder set earlier in the notebook, so the output folder will be a sub-directory inside the working folder. "
+      ],
+      "metadata": {
+        "id": "FsgznAAgkREQ"
+      },
+      "id": "FsgznAAgkREQ"
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "dg.display_derivative_creation_options()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 276,
+          "referenced_widgets": [
+            "59a0275052d647fb961bc6047db5d7fe",
+            "7c2f5dfc0c86446db9ad5f90a150a55a",
+            "0407bedd1f46450091633cb82744b58a",
+            "b955eb612fbd4ab0a9d2e51f53e0bbdc",
+            "de71693c625f4a4a83df3f69c3ad6935",
+            "4b9b4f8f44b74fbe88ec2d739c740bcf",
+            "6006c8e580404906ad5021ae7b90b3d8",
+            "47d17ecd9c684bedb031b17ce982172a",
+            "470be8906e054b9282c3026947250941",
+            "8c8f2380570a4b1187a63d140152c3ed",
+            "dacea094df0444ad873d37cfb2dbf8a9",
+            "026a0b5794d643048d514085397983d7",
+            "f896b528c63c45beaee650b3fbb069b7",
+            "8869a04880c941d6a8217418365bafcd",
+            "826b4600911946aa9e922012588cd6bb"
+          ]
+        },
+        "id": "C3pFTN-ifLOR",
+        "outputId": "e368d770-f625-49b9-de91-3f3bc7b534a4"
+      },
+      "id": "C3pFTN-ifLOR",
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "Dropdown(description='W/ARC file:', options=('ARCHIVEIT-227-UOFTORONTO-CANPOLPINT-20060622205612-00009-crawlin…"
+            ],
+            "application/vnd.jupyter.widget-view+json": {
+              "version_major": 2,
+              "version_minor": 0,
+              "model_id": "59a0275052d647fb961bc6047db5d7fe"
+            }
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "Text(value='output/', description='Output folder:')"
+            ],
+            "application/vnd.jupyter.widget-view+json": {
+              "version_major": 2,
+              "version_minor": 0,
+              "model_id": "b955eb612fbd4ab0a9d2e51f53e0bbdc"
+            }
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "Dropdown(description='File type:', options=('csv', 'parquet'), value='csv')"
+            ],
+            "application/vnd.jupyter.widget-view+json": {
+              "version_major": 2,
+              "version_minor": 0,
+              "model_id": "6006c8e580404906ad5021ae7b90b3d8"
+            }
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "Dropdown(description='Content:', options=('All text content', 'Text content without HTTP headers', 'Text conte…"
+            ],
+            "application/vnd.jupyter.widget-view+json": {
+              "version_major": 2,
+              "version_minor": 0,
+              "model_id": "8c8f2380570a4b1187a63d140152c3ed"
+            }
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "Button(description='Create derivative', style=ButtonStyle())"
+            ],
+            "application/vnd.jupyter.widget-view+json": {
+              "version_major": 2,
+              "version_minor": 0,
+              "model_id": "f896b528c63c45beaee650b3fbb069b7"
+            }
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Creating derivative file... (this may take several minutes)\n",
+            "Derivative generated, saved to: /content/drive/MyDrive/AOY//all-text-quarter/\n",
+            "Creating derivative file... (this may take several minutes)\n",
+            "Derivative generated, saved to: /content/drive/MyDrive/AOY//no-header-quarter/\n",
+            "Creating derivative file... (this may take several minutes)\n",
+            "Derivative generated, saved to: /content/drive/MyDrive/AOY//no-boiler-quarter/\n"
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "display_name": "Python 3 (ipykernel)",
+      "language": "python",
+      "name": "python3"
+    },
+    "language_info": {
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.10.6"
+    },
+    "widgets": {
+      "application/vnd.jupyter.widget-state+json": {
+        "eda0cfdde4de48bd8fab500f4c36e977": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "TextModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_dom_classes": [],
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "TextModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/controls",
+            "_view_module_version": "1.5.0",
+            "_view_name": "TextView",
+            "continuous_update": true,
+            "description": "Folder path:",
+            "description_tooltip": null,
+            "disabled": false,
+            "layout": "IPY_MODEL_83c53f8ef5b24936800073d462eba5ba",
+            "placeholder": "​",
+            "style": "IPY_MODEL_ca05ecab01f047738abc530f5ae48e16",
+            "value": "/content/drive/MyDrive/AOY/"
+          }
+        },
+        "83c53f8ef5b24936800073d462eba5ba": {
+          "model_module": "@jupyter-widgets/base",
+          "model_name": "LayoutModel",
+          "model_module_version": "1.2.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/base",
+            "_model_module_version": "1.2.0",
+            "_model_name": "LayoutModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "LayoutView",
+            "align_content": null,
+            "align_items": null,
+            "align_self": null,
+            "border": null,
+            "bottom": null,
+            "display": null,
+            "flex": null,
+            "flex_flow": null,
+            "grid_area": null,
+            "grid_auto_columns": null,
+            "grid_auto_flow": null,
+            "grid_auto_rows": null,
+            "grid_column": null,
+            "grid_gap": null,
+            "grid_row": null,
+            "grid_template_areas": null,
+            "grid_template_columns": null,
+            "grid_template_rows": null,
+            "height": null,
+            "justify_content": null,
+            "justify_items": null,
+            "left": null,
+            "margin": null,
+            "max_height": null,
+            "max_width": null,
+            "min_height": null,
+            "min_width": null,
+            "object_fit": null,
+            "object_position": null,
+            "order": null,
+            "overflow": null,
+            "overflow_x": null,
+            "overflow_y": null,
+            "padding": null,
+            "right": null,
+            "top": null,
+            "visibility": null,
+            "width": null
+          }
+        },
+        "ca05ecab01f047738abc530f5ae48e16": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "DescriptionStyleModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "DescriptionStyleModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "StyleView",
+            "description_width": ""
+          }
+        },
+        "9594f86c4da146e7b2e97d8260a7271a": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "ButtonModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_dom_classes": [],
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "ButtonModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/controls",
+            "_view_module_version": "1.5.0",
+            "_view_name": "ButtonView",
+            "button_style": "",
+            "description": "Submit",
+            "disabled": false,
+            "icon": "",
+            "layout": "IPY_MODEL_326165f442d1410883ff6cf2a63f04b7",
+            "style": "IPY_MODEL_4ebfce5342bd4c899f012ce12332345c",
+            "tooltip": ""
+          }
+        },
+        "326165f442d1410883ff6cf2a63f04b7": {
+          "model_module": "@jupyter-widgets/base",
+          "model_name": "LayoutModel",
+          "model_module_version": "1.2.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/base",
+            "_model_module_version": "1.2.0",
+            "_model_name": "LayoutModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "LayoutView",
+            "align_content": null,
+            "align_items": null,
+            "align_self": null,
+            "border": null,
+            "bottom": null,
+            "display": null,
+            "flex": null,
+            "flex_flow": null,
+            "grid_area": null,
+            "grid_auto_columns": null,
+            "grid_auto_flow": null,
+            "grid_auto_rows": null,
+            "grid_column": null,
+            "grid_gap": null,
+            "grid_row": null,
+            "grid_template_areas": null,
+            "grid_template_columns": null,
+            "grid_template_rows": null,
+            "height": null,
+            "justify_content": null,
+            "justify_items": null,
+            "left": null,
+            "margin": null,
+            "max_height": null,
+            "max_width": null,
+            "min_height": null,
+            "min_width": null,
+            "object_fit": null,
+            "object_position": null,
+            "order": null,
+            "overflow": null,
+            "overflow_x": null,
+            "overflow_y": null,
+            "padding": null,
+            "right": null,
+            "top": null,
+            "visibility": null,
+            "width": null
+          }
+        },
+        "4ebfce5342bd4c899f012ce12332345c": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "ButtonStyleModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "ButtonStyleModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "StyleView",
+            "button_color": null,
+            "font_weight": ""
+          }
+        },
+        "694de876419a46ff9006b533765468fd": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "TextModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_dom_classes": [],
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "TextModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/controls",
+            "_view_module_version": "1.5.0",
+            "_view_name": "TextView",
+            "continuous_update": true,
+            "description": "W/ARC URL: ",
+            "description_tooltip": null,
+            "disabled": false,
+            "layout": "IPY_MODEL_f3d2ab74651047bd8ec1be056c279ccc",
+            "placeholder": "​",
+            "style": "IPY_MODEL_bd423484514e42cdac7bf3f1c21f33d2",
+            "value": ""
+          }
+        },
+        "f3d2ab74651047bd8ec1be056c279ccc": {
+          "model_module": "@jupyter-widgets/base",
+          "model_name": "LayoutModel",
+          "model_module_version": "1.2.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/base",
+            "_model_module_version": "1.2.0",
+            "_model_name": "LayoutModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "LayoutView",
+            "align_content": null,
+            "align_items": null,
+            "align_self": null,
+            "border": null,
+            "bottom": null,
+            "display": null,
+            "flex": null,
+            "flex_flow": null,
+            "grid_area": null,
+            "grid_auto_columns": null,
+            "grid_auto_flow": null,
+            "grid_auto_rows": null,
+            "grid_column": null,
+            "grid_gap": null,
+            "grid_row": null,
+            "grid_template_areas": null,
+            "grid_template_columns": null,
+            "grid_template_rows": null,
+            "height": null,
+            "justify_content": null,
+            "justify_items": null,
+            "left": null,
+            "margin": null,
+            "max_height": null,
+            "max_width": null,
+            "min_height": null,
+            "min_width": null,
+            "object_fit": null,
+            "object_position": null,
+            "order": null,
+            "overflow": null,
+            "overflow_x": null,
+            "overflow_y": null,
+            "padding": null,
+            "right": null,
+            "top": null,
+            "visibility": null,
+            "width": null
+          }
+        },
+        "bd423484514e42cdac7bf3f1c21f33d2": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "DescriptionStyleModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "DescriptionStyleModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "StyleView",
+            "description_width": ""
+          }
+        },
+        "4c3ad42f8cae4055b3150579858b2f80": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "ButtonModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_dom_classes": [],
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "ButtonModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/controls",
+            "_view_module_version": "1.5.0",
+            "_view_name": "ButtonView",
+            "button_style": "",
+            "description": "Download W/ARC",
+            "disabled": false,
+            "icon": "",
+            "layout": "IPY_MODEL_60bf43941fda41ea8d4da34d609cbc1e",
+            "style": "IPY_MODEL_b0b3714cddfc4878b5c9da61a68d2e71",
+            "tooltip": ""
+          }
+        },
+        "60bf43941fda41ea8d4da34d609cbc1e": {
+          "model_module": "@jupyter-widgets/base",
+          "model_name": "LayoutModel",
+          "model_module_version": "1.2.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/base",
+            "_model_module_version": "1.2.0",
+            "_model_name": "LayoutModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "LayoutView",
+            "align_content": null,
+            "align_items": null,
+            "align_self": null,
+            "border": null,
+            "bottom": null,
+            "display": null,
+            "flex": null,
+            "flex_flow": null,
+            "grid_area": null,
+            "grid_auto_columns": null,
+            "grid_auto_flow": null,
+            "grid_auto_rows": null,
+            "grid_column": null,
+            "grid_gap": null,
+            "grid_row": null,
+            "grid_template_areas": null,
+            "grid_template_columns": null,
+            "grid_template_rows": null,
+            "height": null,
+            "justify_content": null,
+            "justify_items": null,
+            "left": null,
+            "margin": null,
+            "max_height": null,
+            "max_width": null,
+            "min_height": null,
+            "min_width": null,
+            "object_fit": null,
+            "object_position": null,
+            "order": null,
+            "overflow": null,
+            "overflow_x": null,
+            "overflow_y": null,
+            "padding": null,
+            "right": null,
+            "top": null,
+            "visibility": null,
+            "width": null
+          }
+        },
+        "b0b3714cddfc4878b5c9da61a68d2e71": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "ButtonStyleModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "ButtonStyleModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "StyleView",
+            "button_color": null,
+            "font_weight": ""
+          }
+        },
+        "59a0275052d647fb961bc6047db5d7fe": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "DropdownModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_dom_classes": [],
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "DropdownModel",
+            "_options_labels": [
+              "ARCHIVEIT-227-UOFTORONTO-CANPOLPINT-20060622205612-00009-crawling025.archive.org.arc.gz",
+              "ARCHIVEIT-227-QUARTERLY-XUGECV-20091218231727-00039-crawling06.us.archive.org-8091.warc.gz"
+            ],
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/controls",
+            "_view_module_version": "1.5.0",
+            "_view_name": "DropdownView",
+            "description": "W/ARC file:",
+            "description_tooltip": null,
+            "disabled": false,
+            "index": 1,
+            "layout": "IPY_MODEL_7c2f5dfc0c86446db9ad5f90a150a55a",
+            "style": "IPY_MODEL_0407bedd1f46450091633cb82744b58a"
+          }
+        },
+        "7c2f5dfc0c86446db9ad5f90a150a55a": {
+          "model_module": "@jupyter-widgets/base",
+          "model_name": "LayoutModel",
+          "model_module_version": "1.2.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/base",
+            "_model_module_version": "1.2.0",
+            "_model_name": "LayoutModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "LayoutView",
+            "align_content": null,
+            "align_items": null,
+            "align_self": null,
+            "border": null,
+            "bottom": null,
+            "display": null,
+            "flex": null,
+            "flex_flow": null,
+            "grid_area": null,
+            "grid_auto_columns": null,
+            "grid_auto_flow": null,
+            "grid_auto_rows": null,
+            "grid_column": null,
+            "grid_gap": null,
+            "grid_row": null,
+            "grid_template_areas": null,
+            "grid_template_columns": null,
+            "grid_template_rows": null,
+            "height": null,
+            "justify_content": null,
+            "justify_items": null,
+            "left": null,
+            "margin": null,
+            "max_height": null,
+            "max_width": null,
+            "min_height": null,
+            "min_width": null,
+            "object_fit": null,
+            "object_position": null,
+            "order": null,
+            "overflow": null,
+            "overflow_x": null,
+            "overflow_y": null,
+            "padding": null,
+            "right": null,
+            "top": null,
+            "visibility": null,
+            "width": null
+          }
+        },
+        "0407bedd1f46450091633cb82744b58a": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "DescriptionStyleModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "DescriptionStyleModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "StyleView",
+            "description_width": ""
+          }
+        },
+        "b955eb612fbd4ab0a9d2e51f53e0bbdc": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "TextModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_dom_classes": [],
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "TextModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/controls",
+            "_view_module_version": "1.5.0",
+            "_view_name": "TextView",
+            "continuous_update": true,
+            "description": "Output folder:",
+            "description_tooltip": null,
+            "disabled": false,
+            "layout": "IPY_MODEL_de71693c625f4a4a83df3f69c3ad6935",
+            "placeholder": "​",
+            "style": "IPY_MODEL_4b9b4f8f44b74fbe88ec2d739c740bcf",
+            "value": "no-boiler-quarter/"
+          }
+        },
+        "de71693c625f4a4a83df3f69c3ad6935": {
+          "model_module": "@jupyter-widgets/base",
+          "model_name": "LayoutModel",
+          "model_module_version": "1.2.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/base",
+            "_model_module_version": "1.2.0",
+            "_model_name": "LayoutModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "LayoutView",
+            "align_content": null,
+            "align_items": null,
+            "align_self": null,
+            "border": null,
+            "bottom": null,
+            "display": null,
+            "flex": null,
+            "flex_flow": null,
+            "grid_area": null,
+            "grid_auto_columns": null,
+            "grid_auto_flow": null,
+            "grid_auto_rows": null,
+            "grid_column": null,
+            "grid_gap": null,
+            "grid_row": null,
+            "grid_template_areas": null,
+            "grid_template_columns": null,
+            "grid_template_rows": null,
+            "height": null,
+            "justify_content": null,
+            "justify_items": null,
+            "left": null,
+            "margin": null,
+            "max_height": null,
+            "max_width": null,
+            "min_height": null,
+            "min_width": null,
+            "object_fit": null,
+            "object_position": null,
+            "order": null,
+            "overflow": null,
+            "overflow_x": null,
+            "overflow_y": null,
+            "padding": null,
+            "right": null,
+            "top": null,
+            "visibility": null,
+            "width": null
+          }
+        },
+        "4b9b4f8f44b74fbe88ec2d739c740bcf": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "DescriptionStyleModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "DescriptionStyleModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "StyleView",
+            "description_width": ""
+          }
+        },
+        "6006c8e580404906ad5021ae7b90b3d8": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "DropdownModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_dom_classes": [],
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "DropdownModel",
+            "_options_labels": [
+              "csv",
+              "parquet"
+            ],
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/controls",
+            "_view_module_version": "1.5.0",
+            "_view_name": "DropdownView",
+            "description": "File type:",
+            "description_tooltip": null,
+            "disabled": false,
+            "index": 0,
+            "layout": "IPY_MODEL_47d17ecd9c684bedb031b17ce982172a",
+            "style": "IPY_MODEL_470be8906e054b9282c3026947250941"
+          }
+        },
+        "47d17ecd9c684bedb031b17ce982172a": {
+          "model_module": "@jupyter-widgets/base",
+          "model_name": "LayoutModel",
+          "model_module_version": "1.2.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/base",
+            "_model_module_version": "1.2.0",
+            "_model_name": "LayoutModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "LayoutView",
+            "align_content": null,
+            "align_items": null,
+            "align_self": null,
+            "border": null,
+            "bottom": null,
+            "display": null,
+            "flex": null,
+            "flex_flow": null,
+            "grid_area": null,
+            "grid_auto_columns": null,
+            "grid_auto_flow": null,
+            "grid_auto_rows": null,
+            "grid_column": null,
+            "grid_gap": null,
+            "grid_row": null,
+            "grid_template_areas": null,
+            "grid_template_columns": null,
+            "grid_template_rows": null,
+            "height": null,
+            "justify_content": null,
+            "justify_items": null,
+            "left": null,
+            "margin": null,
+            "max_height": null,
+            "max_width": null,
+            "min_height": null,
+            "min_width": null,
+            "object_fit": null,
+            "object_position": null,
+            "order": null,
+            "overflow": null,
+            "overflow_x": null,
+            "overflow_y": null,
+            "padding": null,
+            "right": null,
+            "top": null,
+            "visibility": null,
+            "width": null
+          }
+        },
+        "470be8906e054b9282c3026947250941": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "DescriptionStyleModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "DescriptionStyleModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "StyleView",
+            "description_width": ""
+          }
+        },
+        "8c8f2380570a4b1187a63d140152c3ed": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "DropdownModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_dom_classes": [],
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "DropdownModel",
+            "_options_labels": [
+              "All text content",
+              "Text content without HTTP headers",
+              "Text content without boilerplate"
+            ],
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/controls",
+            "_view_module_version": "1.5.0",
+            "_view_name": "DropdownView",
+            "description": "Content:",
+            "description_tooltip": null,
+            "disabled": false,
+            "index": 2,
+            "layout": "IPY_MODEL_dacea094df0444ad873d37cfb2dbf8a9",
+            "style": "IPY_MODEL_026a0b5794d643048d514085397983d7"
+          }
+        },
+        "dacea094df0444ad873d37cfb2dbf8a9": {
+          "model_module": "@jupyter-widgets/base",
+          "model_name": "LayoutModel",
+          "model_module_version": "1.2.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/base",
+            "_model_module_version": "1.2.0",
+            "_model_name": "LayoutModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "LayoutView",
+            "align_content": null,
+            "align_items": null,
+            "align_self": null,
+            "border": null,
+            "bottom": null,
+            "display": null,
+            "flex": null,
+            "flex_flow": null,
+            "grid_area": null,
+            "grid_auto_columns": null,
+            "grid_auto_flow": null,
+            "grid_auto_rows": null,
+            "grid_column": null,
+            "grid_gap": null,
+            "grid_row": null,
+            "grid_template_areas": null,
+            "grid_template_columns": null,
+            "grid_template_rows": null,
+            "height": null,
+            "justify_content": null,
+            "justify_items": null,
+            "left": null,
+            "margin": null,
+            "max_height": null,
+            "max_width": null,
+            "min_height": null,
+            "min_width": null,
+            "object_fit": null,
+            "object_position": null,
+            "order": null,
+            "overflow": null,
+            "overflow_x": null,
+            "overflow_y": null,
+            "padding": null,
+            "right": null,
+            "top": null,
+            "visibility": null,
+            "width": null
+          }
+        },
+        "026a0b5794d643048d514085397983d7": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "DescriptionStyleModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "DescriptionStyleModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "StyleView",
+            "description_width": ""
+          }
+        },
+        "f896b528c63c45beaee650b3fbb069b7": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "ButtonModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_dom_classes": [],
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "ButtonModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/controls",
+            "_view_module_version": "1.5.0",
+            "_view_name": "ButtonView",
+            "button_style": "",
+            "description": "Create derivative",
+            "disabled": false,
+            "icon": "",
+            "layout": "IPY_MODEL_8869a04880c941d6a8217418365bafcd",
+            "style": "IPY_MODEL_826b4600911946aa9e922012588cd6bb",
+            "tooltip": ""
+          }
+        },
+        "8869a04880c941d6a8217418365bafcd": {
+          "model_module": "@jupyter-widgets/base",
+          "model_name": "LayoutModel",
+          "model_module_version": "1.2.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/base",
+            "_model_module_version": "1.2.0",
+            "_model_name": "LayoutModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "LayoutView",
+            "align_content": null,
+            "align_items": null,
+            "align_self": null,
+            "border": null,
+            "bottom": null,
+            "display": null,
+            "flex": null,
+            "flex_flow": null,
+            "grid_area": null,
+            "grid_auto_columns": null,
+            "grid_auto_flow": null,
+            "grid_auto_rows": null,
+            "grid_column": null,
+            "grid_gap": null,
+            "grid_row": null,
+            "grid_template_areas": null,
+            "grid_template_columns": null,
+            "grid_template_rows": null,
+            "height": null,
+            "justify_content": null,
+            "justify_items": null,
+            "left": null,
+            "margin": null,
+            "max_height": null,
+            "max_width": null,
+            "min_height": null,
+            "min_width": null,
+            "object_fit": null,
+            "object_position": null,
+            "order": null,
+            "overflow": null,
+            "overflow_x": null,
+            "overflow_y": null,
+            "padding": null,
+            "right": null,
+            "top": null,
+            "visibility": null,
+            "width": null
+          }
+        },
+        "826b4600911946aa9e922012588cd6bb": {
+          "model_module": "@jupyter-widgets/controls",
+          "model_name": "ButtonStyleModel",
+          "model_module_version": "1.5.0",
+          "state": {
+            "_model_module": "@jupyter-widgets/controls",
+            "_model_module_version": "1.5.0",
+            "_model_name": "ButtonStyleModel",
+            "_view_count": null,
+            "_view_module": "@jupyter-widgets/base",
+            "_view_module_version": "1.2.0",
+            "_view_name": "StyleView",
+            "button_color": null,
+            "font_weight": ""
+          }
+        }
+      }
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

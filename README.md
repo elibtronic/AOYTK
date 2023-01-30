@@ -39,3 +39,9 @@ If you don't like the Colab environment CSV representations of your data will be
 ![category types](category_types.png)
 
 **figure 1.**
+
+## Documentation
+
+[Walkthrough]() - Comprehensive look at the steps involved in going from Web Archive to Completed Analysis
+
+[API Docs](html/aoytk.html) - Listing of all of the objects and functions in the **aoytk** object 

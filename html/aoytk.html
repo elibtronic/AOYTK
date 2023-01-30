@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>aoytk API documentation</title>
+<meta name="description" content="AOY-TK module. Provides functions and forms to simplify web-archive analysis." />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>aoytk</code></h1>
+</header>
+<section id="section-intro">
+<p>AOY-TK module. Provides functions and forms to simplify web-archive analysis.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34; AOY-TK module. Provides functions and forms to simplify web-archive analysis. 
+&#34;&#34;&#34;
+# AOY-TK Module
+import ipywidgets as widgets 
+import requests
+import os
+import pandas as pd
+import matplotlib as plt 
+
+
+# General purpose functions.
+def display_path_select(): 
+    &#34;&#34;&#34;Displays a text box to set the default path for reading / writing data
+    &#34;&#34;&#34;
+    txt_path = widgets.Text(description=&#34;Folder path:&#34;)
+    def btn_set_path(btn): 
+        global path
+        path = txt_path.value
+        print(f&#34;Folder path set to: {path}&#34;)
+    btn_txt_submit = widgets.Button(description=&#34;Submit&#34;)
+    btn_txt_submit.on_click(btn_set_path)
+    display(txt_path)
+    display(btn_txt_submit)
+
+# Fletcher&#39;s code to download a WARC file from a direct link 
+def download_file(url, filepath=&#39;&#39;, filename=None, loud=True):
+  &#34;&#34;&#34;Displays a text box to specify URL to download file from.
+
+  Args: 
+    url : the URL path to download the file from 
+    filepath : the file path specifying the folder to save the file into
+    filename : the filename to give to the downloaded file 
+               (if None, the filename will be extracted from the URL)
+    loud : boolean indicating whether or not to display download progress
+  &#34;&#34;&#34;
+  if not filename:
+    filename = url.split(&#39;/&#39;)[-1]
+    if &#34;?&#34; in filename: 
+        filename = filename.split(&#34;?&#34;)[0]
+  
+  r = requests.get(url, stream=True)
+  if loud:
+    total_bytes_dl = 0
+    content_len = int(r.headers[&#39;Content-Length&#39;])
+    prog_bar = widgets.IntProgress(value=1, min=0, max=100, step=1, bar_style=&#39;info&#39;,orientation=&#39;horizontal&#39;)
+    print(f&#39;Download progress of {filename}:&#39;)
+    display(prog_bar)
+
+  with open(filepath + filename, &#39;wb&#39;) as fd:
+      for chunk in r.iter_content(chunk_size=4096):
+          fd.write(chunk)
+          if loud:
+            total_bytes_dl += 4096
+            percent = int((total_bytes_dl / content_len) * 100.0)
+            prog_bar.value = percent
+  r.close()
+
+
+def display_download_file(): 
+    &#34;&#34;&#34;Display textbox to download file from specified URL.
+    &#34;&#34;&#34;
+    txt_url = widgets.Text(description=&#34;W/ARC URL: &#34;)
+    btn_download = widgets.Button(description = &#34;Download W/ARC&#34;)
+    def btn_download_action(btn): 
+        url = txt_url.value
+        if url != &#39;&#39;: 
+            download_file(url, path + &#34;/&#34;) # download the file to the specified folder set in the above section
+        else: 
+            print(&#34;Please specify a URL in the textbox above.&#34;)
+    btn_download.on_click(btn_download_action)
+    display(txt_url)
+    display(btn_download)
+
+
+
+class DerivativeGenerator: 
+    &#34;&#34;&#34;Creates derivative files from W/ARCs. 
+    
+    This class contains all of the functions relating to derivative generation.&#34;&#34;&#34;
+    def __init__(self):
+        &#34;&#34;&#34; Initialize the dependencies for creating derivatives.
+        &#34;&#34;&#34;
+        # initialize the PySpark context
+        import findspark
+        findspark.init()
+        import pyspark
+        self.sc = pyspark.SparkContext()
+        from pyspark.sql import SQLContext
+        self.sqlContext = SQLContext(self.sc)
+
+    # a messy first guess at derivative generation
+    def generate_derivative(self, source_file, output_folder, file_type=&#34;csv&#34;, text_filters=0):
+        &#34;&#34;&#34;Create a text derivative file from the specified source file.
+
+        Create a text derivative from the specified W/ARC source file, using the output settings specified. 
+        Args: 
+            source_file: the path to the W/ARC file to generatet the derivative from 
+            output_folder: the name for the output folder to save the derivative into 
+                        (Note: this is currently a relative path, the folder will be created as a 
+                                sub-folder of the working folder)
+            file_type: the file format to save the produced derivative in. 
+                    Can be either &#34;csv&#34; or &#34;parquet&#34; 
+            text_filters: an integer representing which type of text filtering to apply to the generated derivative. 
+                        0 : return the complete text content of each webpage (with HTML tags removed)
+                        1 : return the complete text with HTTP headers removed 
+                        2 : return the text with the boilerplate removed (boilerplate includes nav bars etc) 
+        &#34;&#34;&#34; 
+        # import the AUT (needs to be done after the PySpark set-up)
+        from aut import WebArchive, remove_html, remove_http_header, extract_boilerplate
+        from pyspark.sql.functions import col, desc
+        
+        # create our WebArchive object from the W/ARC file
+        archive = WebArchive(self.sc, self.sqlContext, source_file)
+
+        if text_filters == 0: 
+            content = remove_html(&#34;content&#34;)
+        elif text_filters == 1: 
+            content = remove_html(remove_http_header(&#34;content&#34;))
+        else: 
+            content = extract_boilerplate(remove_http_header(&#34;content&#34;)).alias(&#34;content&#34;)
+
+        archive.webpages() \
+            .select(&#34;crawl_date&#34;, &#34;domain&#34;, &#34;url&#34;, content) \
+            .write \
+            .option(&#34;timestampFormat&#34;, &#34;yyyy/MM/dd HH:mm:ss ZZ&#34;) \
+            .format(file_type) \
+            .option(&#34;escape&#34;, &#34;\&#34;&#34;) \
+            .option(&#34;encoding&#34;, &#34;utf-8&#34;) \
+            .save(output_folder)
+
+        # rename the datafile to have a meaningful title, remove the success file
+        success = False
+        for f in os.scandir(output_folder): 
+            if f.path.split(&#34;/&#34;)[-1] == &#34;_SUCCESS&#34;: 
+                # indicate that the derivative was generated successfully
+                success = True
+                # remove the success indicator file
+                os.remove(f.path)
+            if f.path.split(&#34;.&#34;)[-1] == file_type: 
+                source_file_name = source_file.split(&#34;.&#34;)[0]
+                source_file_name = source_file_name.split(&#34;/&#34;)[-1]
+                os.rename(f.path, output_folder + source_file_name + &#34;.&#34; + file_type)
+        return success
+
+
+    def display_derivative_creation_options(self): 
+        &#34;&#34;&#34; Displays a form to set options for derivative file creation. 
+
+        Displays 4 form elements to select: 
+        - any W/ARC file from within the defined working folder to create a derivative of
+        - desired type of derivative (i.e. what content to include in the derivative)
+        - the output folder for the derivative (will be created within the working directory)
+        - the desired output file type (csv or parquet)
+
+        Also displays a button which, on-click, will run generate_derivative(), 
+        passing in the settings specified in the form. 
+        &#34;&#34;&#34;
+        # file picker for W/ARC files in the specified folder
+        data_files = [x for x in os.listdir(path) if x.endswith((&#34;.warc&#34;, &#34;.arc&#34;, &#34;warc.gz&#34;, &#34;.arc.gz&#34;))]
+        file_options = widgets.Dropdown(description=&#34;W/ARC file:&#34;, options =  data_files)
+        out_text = widgets.Text(description=&#34;Output folder:&#34;, value=&#34;output/&#34;)
+        format_choice = widgets.Dropdown(description=&#34;File type:&#34;,options=[&#34;csv&#34;, &#34;parquet&#34;], value=&#34;csv&#34;)
+        # text content choices 
+        content_options = [&#34;All text content&#34;, &#34;Text content without HTTP headers&#34;, &#34;Text content without boilerplate&#34;]
+        content_choice = widgets.Dropdown(description=&#34;Content:&#34;, options=content_options)
+        content_val = content_options.index(content_choice.value)
+        button = widgets.Button(description=&#34;Create derivative&#34;)
+
+        # this function is defined here in order to keep the other form elements 
+        # in-scope and therefore allow for the reading of their values
+        def btn_create_deriv(btn): 
+            &#34;&#34;&#34;On-click function for the create derivative button. 
+
+            Retrieves the values from the other inputs on the form and passes them to 
+            generate_derivative() to create a derivative file using the selected settings. 
+            &#34;&#34;&#34;
+            content_options = [&#34;All text content&#34;, &#34;Text content without HTTP headers&#34;, &#34;Text content without boilerplate&#34;]
+            input_file = path + &#34;/&#34; + file_options.value
+            output_location = path + &#34;/&#34; + out_text.value
+            content_val = content_options.index(content_choice.value)
+            print(&#34;Creating derivative file... (this may take several minutes)&#34;)
+            if self.generate_derivative(input_file, output_location, format_choice.value, content_val):
+                print(&#34;Derivative generated, saved to: &#34; + output_location)
+            else: 
+                print(&#34;An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.&#34;)
+        button.on_click(btn_create_deriv)
+        display(file_options)
+        display(out_text)
+        display(format_choice)
+        display(content_choice)
+        display(button)
+
+
+class Analyzer: 
+    &#34;&#34;&#34; Tools for analyzing W/ARC derivatives.
+    &#34;&#34;&#34;
+        
+    def load_data(self, filename):
+        &#34;&#34;&#34;Load a datafile to work with. 
+        &#34;&#34;&#34;
+        self.data = pd.read_csv()
+        </code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="aoytk.display_download_file"><code class="name flex">
+<span>def <span class="ident">display_download_file</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Display textbox to download file from specified URL.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def display_download_file(): 
+    &#34;&#34;&#34;Display textbox to download file from specified URL.
+    &#34;&#34;&#34;
+    txt_url = widgets.Text(description=&#34;W/ARC URL: &#34;)
+    btn_download = widgets.Button(description = &#34;Download W/ARC&#34;)
+    def btn_download_action(btn): 
+        url = txt_url.value
+        if url != &#39;&#39;: 
+            download_file(url, path + &#34;/&#34;) # download the file to the specified folder set in the above section
+        else: 
+            print(&#34;Please specify a URL in the textbox above.&#34;)
+    btn_download.on_click(btn_download_action)
+    display(txt_url)
+    display(btn_download)</code></pre>
+</details>
+</dd>
+<dt id="aoytk.display_path_select"><code class="name flex">
+<span>def <span class="ident">display_path_select</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Displays a text box to set the default path for reading / writing data</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def display_path_select(): 
+    &#34;&#34;&#34;Displays a text box to set the default path for reading / writing data
+    &#34;&#34;&#34;
+    txt_path = widgets.Text(description=&#34;Folder path:&#34;)
+    def btn_set_path(btn): 
+        global path
+        path = txt_path.value
+        print(f&#34;Folder path set to: {path}&#34;)
+    btn_txt_submit = widgets.Button(description=&#34;Submit&#34;)
+    btn_txt_submit.on_click(btn_set_path)
+    display(txt_path)
+    display(btn_txt_submit)</code></pre>
+</details>
+</dd>
+<dt id="aoytk.download_file"><code class="name flex">
+<span>def <span class="ident">download_file</span></span>(<span>url, filepath='', filename=None, loud=True)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Displays a text box to specify URL to download file from.</p>
+<p>Args:
+url : the URL path to download the file from
+filepath : the file path specifying the folder to save the file into
+filename : the filename to give to the downloaded file
+(if None, the filename will be extracted from the URL)
+loud : boolean indicating whether or not to display download progress</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def download_file(url, filepath=&#39;&#39;, filename=None, loud=True):
+  &#34;&#34;&#34;Displays a text box to specify URL to download file from.
+
+  Args: 
+    url : the URL path to download the file from 
+    filepath : the file path specifying the folder to save the file into
+    filename : the filename to give to the downloaded file 
+               (if None, the filename will be extracted from the URL)
+    loud : boolean indicating whether or not to display download progress
+  &#34;&#34;&#34;
+  if not filename:
+    filename = url.split(&#39;/&#39;)[-1]
+    if &#34;?&#34; in filename: 
+        filename = filename.split(&#34;?&#34;)[0]
+  
+  r = requests.get(url, stream=True)
+  if loud:
+    total_bytes_dl = 0
+    content_len = int(r.headers[&#39;Content-Length&#39;])
+    prog_bar = widgets.IntProgress(value=1, min=0, max=100, step=1, bar_style=&#39;info&#39;,orientation=&#39;horizontal&#39;)
+    print(f&#39;Download progress of {filename}:&#39;)
+    display(prog_bar)
+
+  with open(filepath + filename, &#39;wb&#39;) as fd:
+      for chunk in r.iter_content(chunk_size=4096):
+          fd.write(chunk)
+          if loud:
+            total_bytes_dl += 4096
+            percent = int((total_bytes_dl / content_len) * 100.0)
+            prog_bar.value = percent
+  r.close()</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="aoytk.Analyzer"><code class="flex name class">
+<span>class <span class="ident">Analyzer</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Tools for analyzing W/ARC derivatives.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Analyzer: 
+    &#34;&#34;&#34; Tools for analyzing W/ARC derivatives.
+    &#34;&#34;&#34;
+        
+    def load_data(self, filename):
+        &#34;&#34;&#34;Load a datafile to work with. 
+        &#34;&#34;&#34;
+        self.data = pd.read_csv()</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="aoytk.Analyzer.load_data"><code class="name flex">
+<span>def <span class="ident">load_data</span></span>(<span>self, filename)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Load a datafile to work with.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_data(self, filename):
+    &#34;&#34;&#34;Load a datafile to work with. 
+    &#34;&#34;&#34;
+    self.data = pd.read_csv()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="aoytk.DerivativeGenerator"><code class="flex name class">
+<span>class <span class="ident">DerivativeGenerator</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates derivative files from W/ARCs. </p>
+<p>This class contains all of the functions relating to derivative generation.</p>
+<p>Initialize the dependencies for creating derivatives.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class DerivativeGenerator: 
+    &#34;&#34;&#34;Creates derivative files from W/ARCs. 
+    
+    This class contains all of the functions relating to derivative generation.&#34;&#34;&#34;
+    def __init__(self):
+        &#34;&#34;&#34; Initialize the dependencies for creating derivatives.
+        &#34;&#34;&#34;
+        # initialize the PySpark context
+        import findspark
+        findspark.init()
+        import pyspark
+        self.sc = pyspark.SparkContext()
+        from pyspark.sql import SQLContext
+        self.sqlContext = SQLContext(self.sc)
+
+    # a messy first guess at derivative generation
+    def generate_derivative(self, source_file, output_folder, file_type=&#34;csv&#34;, text_filters=0):
+        &#34;&#34;&#34;Create a text derivative file from the specified source file.
+
+        Create a text derivative from the specified W/ARC source file, using the output settings specified. 
+        Args: 
+            source_file: the path to the W/ARC file to generatet the derivative from 
+            output_folder: the name for the output folder to save the derivative into 
+                        (Note: this is currently a relative path, the folder will be created as a 
+                                sub-folder of the working folder)
+            file_type: the file format to save the produced derivative in. 
+                    Can be either &#34;csv&#34; or &#34;parquet&#34; 
+            text_filters: an integer representing which type of text filtering to apply to the generated derivative. 
+                        0 : return the complete text content of each webpage (with HTML tags removed)
+                        1 : return the complete text with HTTP headers removed 
+                        2 : return the text with the boilerplate removed (boilerplate includes nav bars etc) 
+        &#34;&#34;&#34; 
+        # import the AUT (needs to be done after the PySpark set-up)
+        from aut import WebArchive, remove_html, remove_http_header, extract_boilerplate
+        from pyspark.sql.functions import col, desc
+        
+        # create our WebArchive object from the W/ARC file
+        archive = WebArchive(self.sc, self.sqlContext, source_file)
+
+        if text_filters == 0: 
+            content = remove_html(&#34;content&#34;)
+        elif text_filters == 1: 
+            content = remove_html(remove_http_header(&#34;content&#34;))
+        else: 
+            content = extract_boilerplate(remove_http_header(&#34;content&#34;)).alias(&#34;content&#34;)
+
+        archive.webpages() \
+            .select(&#34;crawl_date&#34;, &#34;domain&#34;, &#34;url&#34;, content) \
+            .write \
+            .option(&#34;timestampFormat&#34;, &#34;yyyy/MM/dd HH:mm:ss ZZ&#34;) \
+            .format(file_type) \
+            .option(&#34;escape&#34;, &#34;\&#34;&#34;) \
+            .option(&#34;encoding&#34;, &#34;utf-8&#34;) \
+            .save(output_folder)
+
+        # rename the datafile to have a meaningful title, remove the success file
+        success = False
+        for f in os.scandir(output_folder): 
+            if f.path.split(&#34;/&#34;)[-1] == &#34;_SUCCESS&#34;: 
+                # indicate that the derivative was generated successfully
+                success = True
+                # remove the success indicator file
+                os.remove(f.path)
+            if f.path.split(&#34;.&#34;)[-1] == file_type: 
+                source_file_name = source_file.split(&#34;.&#34;)[0]
+                source_file_name = source_file_name.split(&#34;/&#34;)[-1]
+                os.rename(f.path, output_folder + source_file_name + &#34;.&#34; + file_type)
+        return success
+
+
+    def display_derivative_creation_options(self): 
+        &#34;&#34;&#34; Displays a form to set options for derivative file creation. 
+
+        Displays 4 form elements to select: 
+        - any W/ARC file from within the defined working folder to create a derivative of
+        - desired type of derivative (i.e. what content to include in the derivative)
+        - the output folder for the derivative (will be created within the working directory)
+        - the desired output file type (csv or parquet)
+
+        Also displays a button which, on-click, will run generate_derivative(), 
+        passing in the settings specified in the form. 
+        &#34;&#34;&#34;
+        # file picker for W/ARC files in the specified folder
+        data_files = [x for x in os.listdir(path) if x.endswith((&#34;.warc&#34;, &#34;.arc&#34;, &#34;warc.gz&#34;, &#34;.arc.gz&#34;))]
+        file_options = widgets.Dropdown(description=&#34;W/ARC file:&#34;, options =  data_files)
+        out_text = widgets.Text(description=&#34;Output folder:&#34;, value=&#34;output/&#34;)
+        format_choice = widgets.Dropdown(description=&#34;File type:&#34;,options=[&#34;csv&#34;, &#34;parquet&#34;], value=&#34;csv&#34;)
+        # text content choices 
+        content_options = [&#34;All text content&#34;, &#34;Text content without HTTP headers&#34;, &#34;Text content without boilerplate&#34;]
+        content_choice = widgets.Dropdown(description=&#34;Content:&#34;, options=content_options)
+        content_val = content_options.index(content_choice.value)
+        button = widgets.Button(description=&#34;Create derivative&#34;)
+
+        # this function is defined here in order to keep the other form elements 
+        # in-scope and therefore allow for the reading of their values
+        def btn_create_deriv(btn): 
+            &#34;&#34;&#34;On-click function for the create derivative button. 
+
+            Retrieves the values from the other inputs on the form and passes them to 
+            generate_derivative() to create a derivative file using the selected settings. 
+            &#34;&#34;&#34;
+            content_options = [&#34;All text content&#34;, &#34;Text content without HTTP headers&#34;, &#34;Text content without boilerplate&#34;]
+            input_file = path + &#34;/&#34; + file_options.value
+            output_location = path + &#34;/&#34; + out_text.value
+            content_val = content_options.index(content_choice.value)
+            print(&#34;Creating derivative file... (this may take several minutes)&#34;)
+            if self.generate_derivative(input_file, output_location, format_choice.value, content_val):
+                print(&#34;Derivative generated, saved to: &#34; + output_location)
+            else: 
+                print(&#34;An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.&#34;)
+        button.on_click(btn_create_deriv)
+        display(file_options)
+        display(out_text)
+        display(format_choice)
+        display(content_choice)
+        display(button)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="aoytk.DerivativeGenerator.display_derivative_creation_options"><code class="name flex">
+<span>def <span class="ident">display_derivative_creation_options</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Displays a form to set options for derivative file creation. </p>
+<p>Displays 4 form elements to select:
+- any W/ARC file from within the defined working folder to create a derivative of
+- desired type of derivative (i.e. what content to include in the derivative)
+- the output folder for the derivative (will be created within the working directory)
+- the desired output file type (csv or parquet)</p>
+<p>Also displays a button which, on-click, will run generate_derivative(),
+passing in the settings specified in the form.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def display_derivative_creation_options(self): 
+    &#34;&#34;&#34; Displays a form to set options for derivative file creation. 
+
+    Displays 4 form elements to select: 
+    - any W/ARC file from within the defined working folder to create a derivative of
+    - desired type of derivative (i.e. what content to include in the derivative)
+    - the output folder for the derivative (will be created within the working directory)
+    - the desired output file type (csv or parquet)
+
+    Also displays a button which, on-click, will run generate_derivative(), 
+    passing in the settings specified in the form. 
+    &#34;&#34;&#34;
+    # file picker for W/ARC files in the specified folder
+    data_files = [x for x in os.listdir(path) if x.endswith((&#34;.warc&#34;, &#34;.arc&#34;, &#34;warc.gz&#34;, &#34;.arc.gz&#34;))]
+    file_options = widgets.Dropdown(description=&#34;W/ARC file:&#34;, options =  data_files)
+    out_text = widgets.Text(description=&#34;Output folder:&#34;, value=&#34;output/&#34;)
+    format_choice = widgets.Dropdown(description=&#34;File type:&#34;,options=[&#34;csv&#34;, &#34;parquet&#34;], value=&#34;csv&#34;)
+    # text content choices 
+    content_options = [&#34;All text content&#34;, &#34;Text content without HTTP headers&#34;, &#34;Text content without boilerplate&#34;]
+    content_choice = widgets.Dropdown(description=&#34;Content:&#34;, options=content_options)
+    content_val = content_options.index(content_choice.value)
+    button = widgets.Button(description=&#34;Create derivative&#34;)
+
+    # this function is defined here in order to keep the other form elements 
+    # in-scope and therefore allow for the reading of their values
+    def btn_create_deriv(btn): 
+        &#34;&#34;&#34;On-click function for the create derivative button. 
+
+        Retrieves the values from the other inputs on the form and passes them to 
+        generate_derivative() to create a derivative file using the selected settings. 
+        &#34;&#34;&#34;
+        content_options = [&#34;All text content&#34;, &#34;Text content without HTTP headers&#34;, &#34;Text content without boilerplate&#34;]
+        input_file = path + &#34;/&#34; + file_options.value
+        output_location = path + &#34;/&#34; + out_text.value
+        content_val = content_options.index(content_choice.value)
+        print(&#34;Creating derivative file... (this may take several minutes)&#34;)
+        if self.generate_derivative(input_file, output_location, format_choice.value, content_val):
+            print(&#34;Derivative generated, saved to: &#34; + output_location)
+        else: 
+            print(&#34;An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.&#34;)
+    button.on_click(btn_create_deriv)
+    display(file_options)
+    display(out_text)
+    display(format_choice)
+    display(content_choice)
+    display(button)</code></pre>
+</details>
+</dd>
+<dt id="aoytk.DerivativeGenerator.generate_derivative"><code class="name flex">
+<span>def <span class="ident">generate_derivative</span></span>(<span>self, source_file, output_folder, file_type='csv', text_filters=0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a text derivative file from the specified source file.</p>
+<p>Create a text derivative from the specified W/ARC source file, using the output settings specified.
+Args:
+source_file: the path to the W/ARC file to generatet the derivative from
+output_folder: the name for the output folder to save the derivative into
+(Note: this is currently a relative path, the folder will be created as a
+sub-folder of the working folder)
+file_type: the file format to save the produced derivative in.
+Can be either "csv" or "parquet"
+text_filters: an integer representing which type of text filtering to apply to the generated derivative.
+0 : return the complete text content of each webpage (with HTML tags removed)
+1 : return the complete text with HTTP headers removed
+2 : return the text with the boilerplate removed (boilerplate includes nav bars etc)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_derivative(self, source_file, output_folder, file_type=&#34;csv&#34;, text_filters=0):
+    &#34;&#34;&#34;Create a text derivative file from the specified source file.
+
+    Create a text derivative from the specified W/ARC source file, using the output settings specified. 
+    Args: 
+        source_file: the path to the W/ARC file to generatet the derivative from 
+        output_folder: the name for the output folder to save the derivative into 
+                    (Note: this is currently a relative path, the folder will be created as a 
+                            sub-folder of the working folder)
+        file_type: the file format to save the produced derivative in. 
+                Can be either &#34;csv&#34; or &#34;parquet&#34; 
+        text_filters: an integer representing which type of text filtering to apply to the generated derivative. 
+                    0 : return the complete text content of each webpage (with HTML tags removed)
+                    1 : return the complete text with HTTP headers removed 
+                    2 : return the text with the boilerplate removed (boilerplate includes nav bars etc) 
+    &#34;&#34;&#34; 
+    # import the AUT (needs to be done after the PySpark set-up)
+    from aut import WebArchive, remove_html, remove_http_header, extract_boilerplate
+    from pyspark.sql.functions import col, desc
+    
+    # create our WebArchive object from the W/ARC file
+    archive = WebArchive(self.sc, self.sqlContext, source_file)
+
+    if text_filters == 0: 
+        content = remove_html(&#34;content&#34;)
+    elif text_filters == 1: 
+        content = remove_html(remove_http_header(&#34;content&#34;))
+    else: 
+        content = extract_boilerplate(remove_http_header(&#34;content&#34;)).alias(&#34;content&#34;)
+
+    archive.webpages() \
+        .select(&#34;crawl_date&#34;, &#34;domain&#34;, &#34;url&#34;, content) \
+        .write \
+        .option(&#34;timestampFormat&#34;, &#34;yyyy/MM/dd HH:mm:ss ZZ&#34;) \
+        .format(file_type) \
+        .option(&#34;escape&#34;, &#34;\&#34;&#34;) \
+        .option(&#34;encoding&#34;, &#34;utf-8&#34;) \
+        .save(output_folder)
+
+    # rename the datafile to have a meaningful title, remove the success file
+    success = False
+    for f in os.scandir(output_folder): 
+        if f.path.split(&#34;/&#34;)[-1] == &#34;_SUCCESS&#34;: 
+            # indicate that the derivative was generated successfully
+            success = True
+            # remove the success indicator file
+            os.remove(f.path)
+        if f.path.split(&#34;.&#34;)[-1] == file_type: 
+            source_file_name = source_file.split(&#34;.&#34;)[0]
+            source_file_name = source_file_name.split(&#34;/&#34;)[-1]
+            os.rename(f.path, output_folder + source_file_name + &#34;.&#34; + file_type)
+    return success</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="aoytk.display_download_file" href="#aoytk.display_download_file">display_download_file</a></code></li>
+<li><code><a title="aoytk.display_path_select" href="#aoytk.display_path_select">display_path_select</a></code></li>
+<li><code><a title="aoytk.download_file" href="#aoytk.download_file">download_file</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="aoytk.Analyzer" href="#aoytk.Analyzer">Analyzer</a></code></h4>
+<ul class="">
+<li><code><a title="aoytk.Analyzer.load_data" href="#aoytk.Analyzer.load_data">load_data</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="aoytk.DerivativeGenerator" href="#aoytk.DerivativeGenerator">DerivativeGenerator</a></code></h4>
+<ul class="">
+<li><code><a title="aoytk.DerivativeGenerator.display_derivative_creation_options" href="#aoytk.DerivativeGenerator.display_derivative_creation_options">display_derivative_creation_options</a></code></li>
+<li><code><a title="aoytk.DerivativeGenerator.generate_derivative" href="#aoytk.DerivativeGenerator.generate_derivative">generate_derivative</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
