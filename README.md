@@ -23,12 +23,14 @@ Premade Notebooks to analyze different derivative types are outlined in the foll
 |Category   |Notebook Topic   | Launch    |
 |---|---|---|
 |Collection|   |   |
+|    |    |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
 |Network|   |  |
-|   |Graph Analysis   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
+|   |Graph Analysis   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/AOY_Text_BasicTextAnalysis.ipynb)   |
 |Text   |   |   |
 |   |Basic Text Analysis   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
 |   |Topic Modeling   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
 |File Formats|   |   |
+|    |    |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
 
 
 ![category types](category_types.png)
