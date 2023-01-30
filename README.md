@@ -1,5 +1,8 @@
-# AOYTK
-All Our Yesterdays Toolkit
+
+![AOY_Logo](aoy_logo.png)
+
+# All Our Yesterdays
+A toolkit to explore Web Archives
 
 ## Purpose
 
