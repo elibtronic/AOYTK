@@ -43,3 +43,19 @@
   - SL
    - provide pySpark details to TR
    - further development
+
+## Jan 30
+
+ - Temporary Logo completed
+ - pdoc to generate 'api' documentation [https://pdoc3.github.io/pdoc](https://pdoc3.github.io/pdoc/doc/pdoc/#gsc.tab=0)
+ - Porting to a cleaner Colab experience
+ - Work on Analyzer Notebook is underway
+ - Decision on default path. Will be set to `content/drive/MyDrive/AOY`. Widgets will be updated to reflect that
+
+
+ - Next Steps
+  - TR
+    - continue to port to Colab stuff
+  - SL
+    - continue to work on Analyzer Notebook
+    - Also Workclouds!
