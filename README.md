@@ -1,5 +1,5 @@
 
-![AOY_Logo](aoy_logo.png)
+![AOY_Logo](AOY_Logo.png)
 
 # All Our Yesterdays
 A toolkit to explore Web Archives
