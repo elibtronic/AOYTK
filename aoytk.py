@@ -7,6 +7,8 @@ import os
 import pandas as pd
 import matplotlib as plt 
 
+# Global path variable -- a default for Google Drive usage
+path = "/content/drive/MyDrive/AOY/" # default path, can be overwritten by the path-setter widget
 
 # General purpose functions.
 def display_path_select(): 
@@ -194,9 +196,32 @@ class DerivativeGenerator:
 class Analyzer: 
     """ Tools for analyzing W/ARC derivatives.
     """
-        
-    def load_data(self, filename):
+    def __init__(self): 
+        # initialize the data attribute to None -- should possibly be an empty dataframe? consult with appropriate design patterns
+        self.data = None
+
+    def load_data(self):
         """Load a datafile to work with. 
         """
-        self.data = pd.read_csv()
+        # display the options available in the working directory
+        file_options = widgets.Dropdown(description = "Derivative file:", options = [x for x in os.listdir(path) if x.endswith((".csv", ".parquet", ".pqt"))])
+        button = widgets.Button(description = "Select file")
+        def btn_select_file(btn): 
+            selected_file = path + "/" + file_options.value
+            self.data = pd.read_csv(selected_file)
+            print(f"File chosen: {selected_file}")
+        button.on_click(btn_select_file)
+        display(file_options)
+        display(button)
+        
+
+    def display_top_domains(self): 
+        """Display the most frequently crawled domains in the dataset.
+        """
+        def top_domains(n): 
+            print(self.data["domain"].value_counts().head(n))
+        n_slider = widgets.IntSlider()
+        out = widgets.interactive_output(top_domains, {'n':n_slider})
+        display(n_slider)
+        display(out)
         
