@@ -59,3 +59,11 @@
   - SL
     - continue to work on Analyzer Notebook
     - Also Workclouds!
+
+## Feb 13
+
+- FJ will make a text analysis notebook. Working on root directory as `/AOY`. Will use same test data set SL has been developing with
+- SL will brush up on widget that will be reused. Has made progress on Analyzer notebook, and issues
+- TR will look at the CSV output bug and put together prototype of GIT cells
+- Development will go on to the idea of 'branches'. FJ, SL, TR, will each create a different branch and work on that 
+
