@@ -30,7 +30,7 @@ Premade Notebooks to analyze different derivative types are outlined in the foll
 |   |Graph Analysis   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/AOY_Text_BasicTextAnalysis.ipynb)   |
 |Text   |   |   |
 |   |Basic Text Analysis   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
-|   |Topic Modeling   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
+|   |Topic Modeling   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/AOY_Text_Topic_Modeling.ipynb)   |
 |File Formats|   |   |
 |    |    |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
 
