@@ -14,7 +14,7 @@ path = "/content/drive/MyDrive/AOY/" # default path, can be overwritten by the p
 def display_path_select(): 
     """Displays a text box to set the default path for reading / writing data
     """
-    txt_path = widgets.Text(description="Folder path:")
+    txt_path = widgets.Text(description="Folder path:", value = "/content/drive/MyDrive/AOY/")
     def btn_set_path(btn): 
         global path
         path = txt_path.value
@@ -56,6 +56,7 @@ def download_file(url, filepath='', filename=None, loud=True):
             percent = int((total_bytes_dl / content_len) * 100.0)
             prog_bar.value = percent
   r.close()
+  print("File download completed.")
 
 
 def display_download_file(): 
