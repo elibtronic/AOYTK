@@ -15,11 +15,14 @@ path = "/content/drive/MyDrive/AOY/" # default path, can be overwritten by the p
 def display_path_select(): 
     """Displays a text box to set the default path for reading / writing data
     """
-    txt_path = widgets.Text(description="Folder path:", value = "/content/drive/MyDrive/AOY/")
+    txt_path = widgets.Text(description="Folder path:", placeholder = "Enter your folder path", value = "/content/drive/MyDrive/AOY/")
     def btn_set_path(btn): 
         global path
-        path = txt_path.value
-        print(f"Folder path set to: {path}")
+        if txt_path.value == "": 
+          print("Please enter a path value.")
+        else: 
+          path = txt_path.value
+          print(f"Folder path set to: {path}")
     btn_txt_submit = widgets.Button(description="Submit")
     btn_txt_submit.on_click(btn_set_path)
     display(txt_path)
