@@ -36,6 +36,8 @@ import os
 import pandas as pd
 import matplotlib as plt 
 
+# Global path variable -- a default for Google Drive usage
+path = &#34;/content/drive/MyDrive/AOY/&#34; # default path, can be overwritten by the path-setter widget
 
 # General purpose functions.
 def display_path_select(): 
@@ -223,11 +225,34 @@ class DerivativeGenerator:
 class Analyzer: 
     &#34;&#34;&#34; Tools for analyzing W/ARC derivatives.
     &#34;&#34;&#34;
-        
-    def load_data(self, filename):
+    def __init__(self): 
+        # initialize the data attribute to None -- should possibly be an empty dataframe? consult with appropriate design patterns
+        self.data = None
+
+    def load_data(self):
         &#34;&#34;&#34;Load a datafile to work with. 
         &#34;&#34;&#34;
-        self.data = pd.read_csv()
+        # display the options available in the working directory
+        file_options = widgets.Dropdown(description = &#34;Derivative file:&#34;, options = [x for x in os.listdir(path) if x.endswith((&#34;.csv&#34;, &#34;.parquet&#34;, &#34;.pqt&#34;))])
+        button = widgets.Button(description = &#34;Select file&#34;)
+        def btn_select_file(btn): 
+            selected_file = path + &#34;/&#34; + file_options.value
+            self.data = pd.read_csv(selected_file)
+            print(f&#34;File chosen: {selected_file}&#34;)
+        button.on_click(btn_select_file)
+        display(file_options)
+        display(button)
+        
+
+    def display_top_domains(self): 
+        &#34;&#34;&#34;Display the most frequently crawled domains in the dataset.
+        &#34;&#34;&#34;
+        def top_domains(n): 
+            print(self.data[&#34;domain&#34;].value_counts().head(n))
+        n_slider = widgets.IntSlider()
+        out = widgets.interactive_output(top_domains, {&#39;n&#39;:n_slider})
+        display(n_slider)
+        display(out)
         </code></pre>
 </details>
 </section>
@@ -351,16 +376,59 @@ loud : boolean indicating whether or not to display download progress</p></div>
 <pre><code class="python">class Analyzer: 
     &#34;&#34;&#34; Tools for analyzing W/ARC derivatives.
     &#34;&#34;&#34;
-        
-    def load_data(self, filename):
+    def __init__(self): 
+        # initialize the data attribute to None -- should possibly be an empty dataframe? consult with appropriate design patterns
+        self.data = None
+
+    def load_data(self):
         &#34;&#34;&#34;Load a datafile to work with. 
         &#34;&#34;&#34;
-        self.data = pd.read_csv()</code></pre>
+        # display the options available in the working directory
+        file_options = widgets.Dropdown(description = &#34;Derivative file:&#34;, options = [x for x in os.listdir(path) if x.endswith((&#34;.csv&#34;, &#34;.parquet&#34;, &#34;.pqt&#34;))])
+        button = widgets.Button(description = &#34;Select file&#34;)
+        def btn_select_file(btn): 
+            selected_file = path + &#34;/&#34; + file_options.value
+            self.data = pd.read_csv(selected_file)
+            print(f&#34;File chosen: {selected_file}&#34;)
+        button.on_click(btn_select_file)
+        display(file_options)
+        display(button)
+        
+
+    def display_top_domains(self): 
+        &#34;&#34;&#34;Display the most frequently crawled domains in the dataset.
+        &#34;&#34;&#34;
+        def top_domains(n): 
+            print(self.data[&#34;domain&#34;].value_counts().head(n))
+        n_slider = widgets.IntSlider()
+        out = widgets.interactive_output(top_domains, {&#39;n&#39;:n_slider})
+        display(n_slider)
+        display(out)</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
+<dt id="aoytk.Analyzer.display_top_domains"><code class="name flex">
+<span>def <span class="ident">display_top_domains</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Display the most frequently crawled domains in the dataset.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def display_top_domains(self): 
+    &#34;&#34;&#34;Display the most frequently crawled domains in the dataset.
+    &#34;&#34;&#34;
+    def top_domains(n): 
+        print(self.data[&#34;domain&#34;].value_counts().head(n))
+    n_slider = widgets.IntSlider()
+    out = widgets.interactive_output(top_domains, {&#39;n&#39;:n_slider})
+    display(n_slider)
+    display(out)</code></pre>
+</details>
+</dd>
 <dt id="aoytk.Analyzer.load_data"><code class="name flex">
-<span>def <span class="ident">load_data</span></span>(<span>self, filename)</span>
+<span>def <span class="ident">load_data</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Load a datafile to work with.</p></div>
@@ -368,10 +436,19 @@ loud : boolean indicating whether or not to display download progress</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def load_data(self, filename):
+<pre><code class="python">def load_data(self):
     &#34;&#34;&#34;Load a datafile to work with. 
     &#34;&#34;&#34;
-    self.data = pd.read_csv()</code></pre>
+    # display the options available in the working directory
+    file_options = widgets.Dropdown(description = &#34;Derivative file:&#34;, options = [x for x in os.listdir(path) if x.endswith((&#34;.csv&#34;, &#34;.parquet&#34;, &#34;.pqt&#34;))])
+    button = widgets.Button(description = &#34;Select file&#34;)
+    def btn_select_file(btn): 
+        selected_file = path + &#34;/&#34; + file_options.value
+        self.data = pd.read_csv(selected_file)
+        print(f&#34;File chosen: {selected_file}&#34;)
+    button.on_click(btn_select_file)
+    display(file_options)
+    display(button)</code></pre>
 </details>
 </dd>
 </dl>
@@ -668,6 +745,7 @@ text_filters: an integer representing which type of text filtering to apply to t
 <li>
 <h4><code><a title="aoytk.Analyzer" href="#aoytk.Analyzer">Analyzer</a></code></h4>
 <ul class="">
+<li><code><a title="aoytk.Analyzer.display_top_domains" href="#aoytk.Analyzer.display_top_domains">display_top_domains</a></code></li>
 <li><code><a title="aoytk.Analyzer.load_data" href="#aoytk.Analyzer.load_data">load_data</a></code></li>
 </ul>
 </li>
