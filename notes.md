@@ -67,3 +67,12 @@
 - TR will look at the CSV output bug and put together prototype of GIT cells
 - Development will go on to the idea of 'branches'. FJ, SL, TR, will each create a different branch and work on that 
 
+
+## Feb 27
+ 
+ - SL, widget work and other things. Changes are pushed to a new branch, header to that csv, bug about dissappearing file
+ - TR, slides for IIPC, continue work on Topic Modelling
+
+- Next Steps
+  - Break down the slides etc. Who will demo what?
+  - Further work on 
