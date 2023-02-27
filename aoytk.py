@@ -6,6 +6,7 @@ import requests
 import os
 import pandas as pd
 import matplotlib as plt 
+import re
 
 # Global path variable -- a default for Google Drive usage
 path = "/content/drive/MyDrive/AOY/" # default path, can be overwritten by the path-setter widget
@@ -23,6 +24,32 @@ def display_path_select():
     btn_txt_submit.on_click(btn_set_path)
     display(txt_path)
     display(btn_txt_submit)
+
+def get_files(main_directory, file_types):
+  """Recursively list files of given types from directory + its subdirectories.
+
+    Args: 
+      main_directory (str): the root directory to look for files in 
+        (including its subdirectories). 
+      file_types (tuple of str): file types to match on ex. (".csv", ".parquet", ".pqt")
+    
+    Returns: 
+      a list of the matching file names, including their path relative to the top level directory
+      Ex. a file in the top-level directory will only return the file name, 
+          a file in a sub directory will include the subdirectory name and 
+          the file name. ex. "subdir/a.csv"
+  """
+  matched_files = []
+  for dirpath, subdirs, files in os.walk(path):
+    subfolder = re.sub(path, "", dirpath)
+    datafiles = [f for f in files if f.endswith(file_types)]
+    for f in datafiles: 
+      if subfolder == "": 
+        matched_files.append(f)
+      else:
+        matched_files.append(f"{subfolder}/{f}")
+  return matched_files
+
 
 # Fletcher's code to download a WARC file from a direct link 
 def download_file(url, filepath='', filename=None, loud=True):
@@ -159,7 +186,7 @@ class DerivativeGenerator:
         passing in the settings specified in the form. 
         """
         # file picker for W/ARC files in the specified folder
-        data_files = [x for x in os.listdir(path) if x.endswith((".warc", ".arc", "warc.gz", ".arc.gz"))]
+        data_files = get_files(path, (".warc", ".arc", "warc.gz", ".arc.gz"))
         file_options = widgets.Dropdown(description="W/ARC file:", options =  data_files)
         out_text = widgets.Text(description="Output folder:", value="output/")
         format_choice = widgets.Dropdown(description="File type:",options=["csv", "parquet"], value="csv")
@@ -205,7 +232,7 @@ class Analyzer:
         """Load a datafile to work with. 
         """
         # display the options available in the working directory
-        file_options = widgets.Dropdown(description = "Derivative file:", options = [x for x in os.listdir(path) if x.endswith((".csv", ".parquet", ".pqt"))])
+        file_options = widgets.Dropdown(description = "Derivative file:", options = get_files(path, (".csv", ".parquet", ".pqt")))
         button = widgets.Button(description = "Select file")
         def btn_select_file(btn): 
             selected_file = path + "/" + file_options.value
