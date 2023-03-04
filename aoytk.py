@@ -264,7 +264,8 @@ class Analyzer:
         """Load a datafile to work with. 
         """
         # display the options available in the working directory
-        file_options = widgets.Dropdown(description = "Derivative file:", options = get_files(path, (".csv", ".parquet", ".pqt")))
+        # Parquet files are not currently supported, if/when they are, add '".parquet", ".pqt"' to the file ending options 
+        file_options = widgets.Dropdown(description = "Derivative file:", options = get_files(path, (".csv")))
         button = widgets.Button(description = "Select file")
         def btn_select_file(btn): 
             selected_file = path + "/" + file_options.value
@@ -278,10 +279,13 @@ class Analyzer:
     def display_top_domains(self): 
         """Display the most frequently crawled domains in the dataset.
         """
+        domain_values = self.data["domain"].value_counts();
+        n_domains = len(domain_values)
         def top_domains(n): 
-            print(self.data["domain"].value_counts().head(n))
-        n_slider = widgets.IntSlider()
+            print(domain_values.head(n))
+        n_slider = widgets.IntSlider(value = 10, max = n_domains)
         out = widgets.interactive_output(top_domains, {'n':n_slider})
+        print(f"There are {n_domains} different domains in the dataset. ")
         display(n_slider)
         display(out)
         
