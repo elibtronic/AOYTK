@@ -121,6 +121,23 @@ class DerivativeGenerator:
         from pyspark.sql import SQLContext
         self.sqlContext = SQLContext(self.sc)
 
+    def create_csv_with_header(self, headers, datafile, outputfile): 
+      """ Create a version of datafile with the specified headers. 
+
+      Args: 
+        headers: a list of column headers in the desired order
+        datafile: the path of the CSV file, without headers, to add headers to
+        outputfile: the path of the desired output file 
+      """
+      import csv
+      with open(outputfile, "w", newline = "") as csvfile: 
+        writer = csv.writer(csvfile, delimiter=",")
+        writer.writerow(headers)
+        with open(datafile, "r") as datafile: 
+          reader = csv.reader(datafile)
+          for row in reader: 
+            writer.writerow(row)
+
     # a messy first guess at derivative generation
     def generate_derivative(self, source_file, output_folder, file_type="csv", text_filters=0):
         """Create a text derivative file from the specified source file.
@@ -141,7 +158,7 @@ class DerivativeGenerator:
         # import the AUT (needs to be done after the PySpark set-up)
         from aut import WebArchive, remove_html, remove_http_header, extract_boilerplate
         from pyspark.sql.functions import col, desc
-        
+
         # create our WebArchive object from the W/ARC file
         archive = WebArchive(self.sc, self.sqlContext, source_file)
 
@@ -163,18 +180,30 @@ class DerivativeGenerator:
 
         # rename the datafile to have a meaningful title, remove the success file
         success = False
+        # the folder will contain exactly 2 files, a _SUCCESS file and the resulting datafile
         for f in os.scandir(output_folder): 
             if f.path.split("/")[-1] == "_SUCCESS": 
                 # indicate that the derivative was generated successfully
                 success = True
                 # remove the success indicator file
                 os.remove(f.path)
+            # for the datafile
             if f.path.split(".")[-1] == file_type: 
                 source_file_name = source_file.split(".")[0]
                 source_file_name = source_file_name.split("/")[-1]
-                os.rename(f.path, output_folder + source_file_name + "." + file_type)
+                # add the appropriate headers
+                if file_type == "csv": 
+                  headers = []
+                  # for all text_filters between 0 and 2, we'll use the same header
+                  # if adding different derivatives, add the appropriate headers here! 
+                  if text_filters >= 0 and text_filters <= 2: 
+                    headers = ["crawl_date", "domain", "url", "content"]
+                  output_path = output_folder + source_file_name + ".csv"
+                  self.create_csv_with_header(headers, f.path, output_path)
+                  os.remove(f.path)
+                else:   
+                  os.rename(f.path, output_folder + source_file_name + "." + file_type)
         return success
-
 
     def display_derivative_creation_options(self): 
         """ Displays a form to set options for derivative file creation. 
