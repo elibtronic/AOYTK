@@ -259,6 +259,20 @@ class Analyzer:
     def __init__(self): 
         # initialize the data attribute to None -- should possibly be an empty dataframe? consult with appropriate design patterns
         self.data = None
+    
+    def set_data(self, datafile): 
+      """ Sets the data attribute for the Analyzer. 
+
+      Parses columns to appropriate types if applicable. 
+
+      Args: 
+        datafile (str): the path to the datafile to analyze. 
+      """
+      self.data = pd.read_csv(datafile)
+      
+      # if the crawl_date column is included on the frame, make it a date
+      if "crawl_date" in list(self.data): 
+        self.data['crawl_date']= pd.to_datetime(self.data['crawl_date'],format='%Y%m%d%H%M%S')
 
     def load_data(self):
         """Load a datafile to work with. 
@@ -267,10 +281,12 @@ class Analyzer:
         # Parquet files are not currently supported, if/when they are, add '".parquet", ".pqt"' to the file ending options 
         file_options = widgets.Dropdown(description = "Derivative file:", options = get_files(path, (".csv")))
         button = widgets.Button(description = "Select file")
+        
         def btn_select_file(btn): 
             selected_file = path + "/" + file_options.value
-            self.data = pd.read_csv(selected_file)
+            self.set_data(selected_file)
             print(f"File chosen: {selected_file}")
+        
         button.on_click(btn_select_file)
         display(file_options)
         display(button)
