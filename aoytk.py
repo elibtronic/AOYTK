@@ -272,25 +272,54 @@ class Analyzer:
       
       # if the crawl_date column is included on the frame, make it a date
       if "crawl_date" in list(self.data): 
-        self.data['crawl_date']= pd.to_datetime(self.data['crawl_date'],format='%Y%m%d%H%M%S')
+        self.data['crawl_date']= pd.to_datetime(self.data['crawl_date']) #, format='%Y%m%d%H%M%S'
 
     def load_data(self):
         """Load a datafile to work with. 
         """
         # display the options available in the working directory
         # Parquet files are not currently supported, if/when they are, add '".parquet", ".pqt"' to the file ending options 
-        file_options = widgets.Dropdown(description = "Derivative file:", options = get_files(path, (".csv")))
+        label = widgets.Label("Derivative file to analyze ")
+        file_options = widgets.Dropdown(description = "", options = get_files(path, (".csv")))
         button = widgets.Button(description = "Select file")
         
         def btn_select_file(btn): 
             selected_file = path + "/" + file_options.value
+            print("Loading data...")
             self.set_data(selected_file)
-            print(f"File chosen: {selected_file}")
+            print(f"Data loaded from: {selected_file}")
         
         button.on_click(btn_select_file)
-        display(file_options)
+        display(widgets.HBox([label, file_options]))
         display(button)
         
+    def date_range_select(self):
+      """ Display a date range selector for valid dates in the data.
+      """
+      from IPython.display import display, Javascript
+      valid_range = self.data.reset_index()['crawl_date'].agg(['min', 'max'])
+      start_label = widgets.Label("Select a start date ")
+      start_picker = widgets.DatePicker(description = "", 
+                                        value = valid_range["min"], 
+                                        disabled = False)
+      start_picker.add_class("start-date")
+      end_label = widgets.Label("Select an end date ")
+      end_picker = widgets.DatePicker(description = "", 
+                                      value = valid_range["max"], 
+                                      disabled = False)
+      end_picker.add_class("end-date")
+
+      js = f"""const query = '.start-date > input:first-of-type';
+           document.querySelector(query).setAttribute('min', '{valid_range['min'].strftime('%Y-%m-%d')}');
+           document.querySelector(query).setAttribute('max', '{valid_range['max'].strftime('%Y-%m-%d')}'); 
+           const q = '.end-date > input:first-of-type';
+           document.querySelector(q).setAttribute('min', '{valid_range['min'].strftime('%Y-%m-%d')}');
+           document.querySelector(q).setAttribute('max', '{valid_range['max'].strftime('%Y-%m-%d')}');"""  
+      script = Javascript(js)
+
+      display(widgets.HBox([start_label, start_picker]))
+      display(widgets.HBox([end_label, end_picker]))
+      display(script)
 
     def display_top_domains(self): 
         """Display the most frequently crawled domains in the dataset.
