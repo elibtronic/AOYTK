@@ -76,3 +76,14 @@
 - Next Steps
   - Break down the slides etc. Who will demo what?
   - Further work on 
+
+## March 6
+
+  - IIPC video is due on March 20
+  - SL derivative creation going well, functionality for headers has been added, graph
+  - TR did most of a topic modelling book, will get FJ to use the same as well.
+
+  - Next Steps
+    - Record demos (hopefully 4 for the presentation, two from SL, 1 from TR & FJ)
+    - Slides for next week and demo vids
+    - We'll all use the same [5000 sample](https://raw.githubusercontent.com/BrockDSL/ARCH_Data_Explore/main/niagara_sample.csv)
