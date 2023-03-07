@@ -24,15 +24,11 @@ Premade Notebooks to analyze different derivative types are outlined in the foll
 
 |Category   |Notebook Topic   | Launch    |
 |---|---|---|
-|Collection|   |   |
-|    |    |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
 |Network|   |  |
 |   |Graph Analysis   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/AOY_Text_BasicTextAnalysis.ipynb)   |
 |Text   |   |   |
 |   |Basic Text Analysis   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
 |   |Topic Modeling   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/AOY_Text_Topic_Modeling.ipynb)   |
-|File Formats|   |   |
-|    |    |  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/)   |
 
 ## Export
 
@@ -45,6 +41,6 @@ If you don't like the Colab environment CSV representations of your data will be
 
 ## Documentation
 
-[Walkthrough]() - Comprehensive look at the steps involved in going from Web Archive to Completed Analysis
+[Tutorials]() - Comprehensive look at the steps involved in going from Web Archive to Completed Analysis
 
 [API Docs](html/aoytk.md) - Listing of all of the objects and functions in the **aoytk** object 
