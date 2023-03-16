@@ -5,7 +5,6 @@ import ipywidgets as widgets
 import requests
 import os
 import pandas as pd
-import matplotlib as plt 
 import re
 
 # Global path variable -- a default for Google Drive usage
@@ -272,7 +271,20 @@ class Analyzer:
       
       # if the crawl_date column is included on the frame, make it a date
       if "crawl_date" in list(self.data): 
-        self.data['crawl_date']= pd.to_datetime(self.data['crawl_date']) #, format='%Y%m%d%H%M%S'
+        # currently pandas is not doing a great job of auto-detecting the date format correctly
+        # temporarily, this code is included to correctly detect and parse the date formats that we have tested on 
+        # this process should be made more robust in the future
+        # get the first date, convert to str
+        date = str(self.data['crawl_date'].iloc[0])
+        if re.match(r"^[0-9]+$", date): 
+          if len(date) == 14: # format='%Y%m%d%H%M%S'
+            self.data['crawl_date'] = pd.to_datetime(self.data['crawl_date'], format = '%Y%m%d%H%M%S')
+          elif len(date) == 8: # format='%Y%m%d'
+            self.data['crawl_date'] = pd.to_datetime(self.data['crawl_date'], format = '%Y%m%d')
+          else: # hope that pandas figures it out 
+            self.data['crawl_date']= pd.to_datetime(self.data['crawl_date'])
+        else: 
+           self.data['crawl_date']= pd.to_datetime(self.data['crawl_date'])
 
     def load_data(self):
         """Load a datafile to work with. 
