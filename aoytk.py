@@ -8,7 +8,7 @@ import pandas as pd
 import re
 import matplotlib.pyplot as plt
 import numpy as np 
-from IPython import display
+from IPython.display import clear_output
 
 # Global path variable -- a default for Google Drive usage
 path = "/content/drive/MyDrive/AOY/" # default path, can be overwritten by the path-setter widget
@@ -310,18 +310,18 @@ class Analyzer:
         display(button)
         
     def date_range_select(self):
-      """ Display a date range selector for valid dates in the data.
+      """ Create a date range selector for valid dates in the data.
       """
       from IPython.display import display, Javascript
       valid_range = self.data.reset_index()['crawl_date'].agg(['min', 'max'])
-      start_label = widgets.Label("Select a start date ")
+      start_label = widgets.Label("Select a start date  ")
       start_picker = widgets.DatePicker(description = "", 
-                                        value = valid_range["min"], 
+                                        value = valid_range["min"].date(), 
                                         disabled = False)
       start_picker.add_class("start-date")
       end_label = widgets.Label("Select an end date ")
       end_picker = widgets.DatePicker(description = "", 
-                                      value = valid_range["max"], 
+                                      value = valid_range["max"].date(), 
                                       disabled = False)
       end_picker.add_class("end-date")
 
@@ -333,9 +333,11 @@ class Analyzer:
            document.querySelector(q).setAttribute('max', '{valid_range['max'].strftime('%Y-%m-%d')}');"""  
       script = Javascript(js)
 
-      display(widgets.HBox([start_label, start_picker]))
-      display(widgets.HBox([end_label, end_picker]))
-      display(script)
+      # try returning the widgets for use / display in various places
+      # returns a list containing all of the widgets, the labels and selectors 
+      # are paired in tuples, the JS for the calendar is seperate
+      return [(start_label, start_picker), (end_label, end_picker), script]
+
 
     def display_top_domains(self): 
         """Display the most frequently crawled domains in the dataset.
@@ -462,13 +464,14 @@ class Analyzer:
                 borderaxespad=0., borderpad=1, labelspacing=3.5, handlelength=4, handletextpad=3,  title='Crawl count by size')    
 
       
-    def create_crawl_frequency_graph(self, n, freq, graph_type, start_date = None, end_date = None): 
+    def create_crawl_frequency_graph(self, n, graph_type, freq = "1M",  start_date = None, end_date = None): 
       """Plots the crawl frequency of the top n domains in the dataset. 
 
       Args: 
         n: the number of the top domains to plot
         freq: the frequency to aggregate the data by. "1M" aggregates it in 1 month groups, 
-          "1W" in 1 week groups
+          "1W" in 1 week groups. A full list of frequencies is available: 
+          https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases
         graph_type: either '2d' for a 2-dimensional visualization of the crawl frequency, or 
           '3d' for a 3-dimensional visualization of the crawl frequency. 
         start_date: an optional string of the form 'YYYY-MM-DD' representing the first date 
@@ -478,6 +481,9 @@ class Analyzer:
           of interest in the dataset. If this is not provided, the latest date in the data will 
           be selected.
       """
+      # this is a temporary line to ignore warning output for the demo video
+      import warnings
+      warnings.filterwarnings("ignore")
       # if no start date is specified, select the min date
       if start_date == None: 
          start_date = self.data["crawl_date"].min()
@@ -499,9 +505,79 @@ class Analyzer:
       aggregated_crawl_count = pd.concat(frames, keys=list(domains))
 
       # create the appropriate graph  
-      if graph_type == "3d": 
+      if graph_type == "3D": 
         self.plot_3d_crawl_frequency(aggregated_crawl_count)
-      elif graph_type == "2d": 
+      elif graph_type == "2D": 
         self.plot_2d_crawl_frequency(aggregated_crawl_count)
       else: 
          print(f"{graph_type} is not a supported graph type. Please choose either '2d' or '3d'.")
+
+    def display_crawl_frequency(self): 
+      # set-up two panes so we can clear the output of the graphs
+      out = widgets.Output()
+
+      graph_options = widgets.RadioButtons(
+         options = ['3D', '2D'], 
+         value = '3D', # default to '3d'
+         disabled = False
+      )
+      graph_options_label = widgets.Label("Style of visualization: ")
+
+      date_components = self.date_range_select()
+      # start_widget = widgets.HBox(date_components[0])
+      # end_widget = widgets.HBox(date_components[1])
+
+      num_domains = widgets.IntSlider(
+         value = 10, 
+         min = 1, 
+         max = 12, 
+         step = 1, 
+      )
+      num_domains_label = widgets.Label("Number of domains: ")
+
+      freq_options = widgets.Dropdown(
+         options = [("Monthly", "1M"), ("Weekly", "1W"), ("Daily", "1D")], 
+         value = "1M")
+      freq_label = widgets.Label("Time scale")
+
+      def create_crawl_btn(btn): 
+          clear_output(True) #only clear the output when the new output is ready
+          display_options()
+          print("Creating visualization... ")
+          self.create_crawl_frequency_graph(num_domains.value, 
+                                            graph_options.value, 
+                                            freq_options.value,
+                                            start_date = pd.Timestamp(date_components[0][1].value), 
+                                            end_date = pd.Timestamp(date_components[1][1].value)
+                                            )
+
+      enter_button = widgets.Button(
+         description="Create visualization", 
+      )
+      enter_button.on_click(create_crawl_btn)
+
+      def display_options(): 
+        """Displays the output options. 
+
+        Allows for them to be redisplayed once the window is cleared to display a new graph.
+        """
+      # display the number of domains
+        display(widgets.HBox([num_domains_label, num_domains]))
+
+        #display the options
+        display(widgets.HBox([graph_options_label, graph_options]))
+
+        # format the date / frequency selectors as a grid to make things a little tidier
+        time_labels = widgets.VBox([date_components[0][0], 
+                      date_components[1][0], 
+                      freq_label])
+        time_selectors = widgets.VBox([date_components[0][1], 
+                         date_components[1][1],
+                         freq_options])
+        time_controls = widgets.HBox([time_labels, time_selectors])
+        display(time_controls)
+        display(date_components[2])
+        # display the enter button -- maybe make this interactable and then not require the button later
+        display(enter_button)
+
+      display_options()
