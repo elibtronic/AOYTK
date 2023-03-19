@@ -6,6 +6,9 @@ import requests
 import os
 import pandas as pd
 import re
+import matplotlib.pyplot as plt
+import numpy as np 
+from IPython import display
 
 # Global path variable -- a default for Google Drive usage
 path = "/content/drive/MyDrive/AOY/" # default path, can be overwritten by the path-setter widget
@@ -253,6 +256,7 @@ class DerivativeGenerator:
 
 
 class Analyzer: 
+    
     """ Tools for analyzing W/ARC derivatives.
     """
     def __init__(self): 
@@ -265,7 +269,7 @@ class Analyzer:
       Parses columns to appropriate types if applicable. 
 
       Args: 
-        datafile (str): the path to the datafile to analyze. 
+        datafile: the path to the datafile to analyze. 
       """
       self.data = pd.read_csv(datafile)
       
@@ -345,4 +349,159 @@ class Analyzer:
         print(f"There are {n_domains} different domains in the dataset. ")
         display(n_slider)
         display(out)
-        
+    
+    def plot_3d_crawl_frequency(self, aggregated_crawl_count):
+        """Creates a 3-dimensional plot of the crawl frequency in the passed dataframe.
+
+        Args: 
+          aggregated_crawl_count: a pandas dataframe containing the domains of interest to be plotted, 
+            with their crawl counts aggregated by some frequency
+        """
+        from matplotlib.collections import PolyCollection
+
+        # first get the crawl dates for the axis labels 
+        crawl_dates = sorted(set(aggregated_crawl_count.index.get_level_values('crawl_date').to_pydatetime()))
+        cd_to_xtick = {d:i for i,d in enumerate(crawl_dates)}
+        reverse_cd_map = {i:d for i,d in enumerate(crawl_dates)}
+        # domain names by number of crawls, least -> greatest
+        domains_by_num_crawls = aggregated_crawl_count.groupby(level=0).sum().url.sort_values().index
+
+        verts = []
+        last_domain = None
+        max_crawl_count = 0
+
+        for d in domains_by_num_crawls: 
+           current_polygon = []
+           for t in aggregated_crawl_count.loc[d].sort_index().itertuples(): 
+              tstamp = t.Index.to_pydatetime()
+              tstamp_int = cd_to_xtick[tstamp]
+              crawl_count = t.url
+              max_crawl_count = max(crawl_count, max_crawl_count)
+              if not current_polygon: # for the first polygon
+                current_polygon.append((tstamp_int, 0))
+              current_polygon.append((tstamp_int, crawl_count))
+           current_polygon.append((current_polygon[-1][0], 0))
+           verts.append(current_polygon)
+
+        # now that we have the polygons, set up the plot itself
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18, 24), subplot_kw={'projection': '3d'})
+        facecolors = plt.get_cmap('twilight_shifted_r')(np.linspace(0, 1, len(verts)))
+        # # testing out even spacing of the polygons
+        zs = range(0, len(verts)*2, 2)
+
+        poly = PolyCollection(verts, facecolors = facecolors, alpha = 0.7)
+        ax1.add_collection3d(poly, zs=zs, zdir='x')
+
+        max_y = max(reverse_cd_map)
+        ax1.set(xlim=(0, max(zs)+2), ylim=(-1, max_y+1), zlim=(0, max_crawl_count), 
+                xlabel = '', ylabel = '', zlabel = 'crawls')
+        ax1.invert_xaxis()
+
+        ax1.set_xticks(zs)
+        ax1.set_xticklabels(domains_by_num_crawls, rotation = 40, ha = "right")
+
+        ytick_labels = [reverse_cd_map[i].strftime("%Y-%m-%d") for i in sorted(reverse_cd_map)]
+        ax1.set_yticklabels(ytick_labels, rotation = -20, ha = "left")
+        ax1.set_yticks(range(max_y+1))
+
+        # # 2nd plot? 
+        poly = PolyCollection(verts, facecolors=facecolors, alpha=.7)
+        ax2.add_collection3d(poly, zs=zs, zdir='y')
+
+        max_x = max(reverse_cd_map)
+        ax2.set(xlim=(-1,max_x+1), ylim=(0,max(zs)+2), zlim=(0, max_crawl_count),
+              xlabel='', ylabel='', zlabel='crawls')
+        ax2.invert_xaxis()
+
+        ax2.set_xticks(range(max_x+1))
+        x_tick_labels = [reverse_cd_map[i].strftime("%Y-%m-%d") for i in sorted(reverse_cd_map)]
+        ax2.set_xticklabels(x_tick_labels,rotation=40,ha='right')
+        ax2.set_yticks(zs)
+        ax2.set_yticklabels(domains_by_num_crawls,rotation=-20,ha="left")
+
+    def plot_2d_crawl_frequency(self, aggregated_crawl_count):
+      """Creates a 2D plot of the crawl frequency for the given dataframe. 
+      
+      Args: 
+        aggregated_crawl_count: a pandas dataframe containing the domains of interest to be plotted, 
+          with their crawl counts aggregated by some frequency
+      """
+
+      import math 
+      fig, ax = plt.subplots(figsize=(18,12))
+      crawl_dates = sorted(set(aggregated_crawl_count.index.get_level_values('crawl_date').to_pydatetime()))
+      cd_to_xtick = {d:i for i,d in enumerate(crawl_dates)}
+      reverse_cd_map = {i:d for i,d in enumerate(crawl_dates)}
+      domains_by_ncrawls = aggregated_crawl_count.groupby(level=0).sum().url.sort_values().index
+      domains_by_ncrawls = domains_by_ncrawls[:-1]
+
+      max_crawl_count = 0
+      y = -1
+      for d in domains_by_ncrawls:
+        xaxis = []
+        zaxis = []  
+        y = y + 1
+
+        for t in aggregated_crawl_count.loc[d].sort_index().itertuples():
+          tstamp = t.Index.to_pydatetime()
+          tstamp_int = cd_to_xtick[tstamp]
+          crawl_count = t.url
+          max_crawl_count = max(crawl_count, max_crawl_count)
+
+          xaxis.append(tstamp)
+          zaxis.append(crawl_count**3) #artificially inflate size to create larger circles
+        scatter = ax.scatter(xaxis,[d]*len(xaxis),s=zaxis)
+
+      # Here we create a legend:
+      # we'll plot empty lists with the desired size and label
+      sizes = sorted(set(map(lambda t: t.url**3, aggregated_crawl_count.loc[domains_by_ncrawls].itertuples())))
+      sizes.remove(0)
+      for area in sizes:
+          ax.scatter([], [], color=scatter.cmap(0.7), s=area, label=str(math.ceil(area**(1/3))))
+      ax.legend(scatterpoints=1, loc="upper left",bbox_to_anchor=(1.025, 1), fancybox=True, frameon=True, shadow=True, handleheight=2.2,
+                borderaxespad=0., borderpad=1, labelspacing=3.5, handlelength=4, handletextpad=3,  title='Crawl count by size')    
+
+      
+    def create_crawl_frequency_graph(self, n, freq, graph_type, start_date = None, end_date = None): 
+      """Plots the crawl frequency of the top n domains in the dataset. 
+
+      Args: 
+        n: the number of the top domains to plot
+        freq: the frequency to aggregate the data by. "1M" aggregates it in 1 month groups, 
+          "1W" in 1 week groups
+        graph_type: either '2d' for a 2-dimensional visualization of the crawl frequency, or 
+          '3d' for a 3-dimensional visualization of the crawl frequency. 
+        start_date: an optional string of the form 'YYYY-MM-DD' representing the first date 
+          of interest in the dataset. If this is not provided, the earliest date in the data will 
+          be selected.
+        end_date: an optional string of the form 'YYYY-MM-DD' representing the last date 
+          of interest in the dataset. If this is not provided, the latest date in the data will 
+          be selected.
+      """
+      # if no start date is specified, select the min date
+      if start_date == None: 
+         start_date = self.data["crawl_date"].min()
+      # similiarly for the end date
+      if end_date == None: 
+         end_date = self.data["crawl_date"].max()
+
+      date_mask = (self.data["crawl_date"] >= start_date) & (self.data["crawl_date"] <= end_date)
+      subset_data = self.data.loc[date_mask]
+      # aggregate the data
+      domains = set(subset_data.groupby("domain")\
+          .count()\
+          .sort_values(by = "crawl_date", ascending = False)\
+          .head(n).index)
+      frames = []
+      for d in domains: 
+          # for each domain, get the count of all crawls in each month 
+          frames.append(subset_data.loc[self.data['domain'] == d].groupby(pd.Grouper(key = 'crawl_date', freq = freq)).count())
+      aggregated_crawl_count = pd.concat(frames, keys=list(domains))
+
+      # create the appropriate graph  
+      if graph_type == "3d": 
+        self.plot_3d_crawl_frequency(aggregated_crawl_count)
+      elif graph_type == "2d": 
+        self.plot_2d_crawl_frequency(aggregated_crawl_count)
+      else: 
+         print(f"{graph_type} is not a supported graph type. Please choose either '2d' or '3d'.")
