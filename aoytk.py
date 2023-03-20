@@ -437,6 +437,7 @@ class Analyzer:
       domains_by_ncrawls = aggregated_crawl_count.groupby(level=0).sum().url.sort_values().index
       domains_by_ncrawls = domains_by_ncrawls[:-1]
 
+      inflation_factor = 2.5
       max_crawl_count = 0
       y = -1
       for d in domains_by_ncrawls:
@@ -451,15 +452,15 @@ class Analyzer:
           max_crawl_count = max(crawl_count, max_crawl_count)
 
           xaxis.append(tstamp)
-          zaxis.append(crawl_count**3) #artificially inflate size to create larger circles
+          zaxis.append(crawl_count**inflation_factor ) #artificially inflate size to create larger circles
         scatter = ax.scatter(xaxis,[d]*len(xaxis),s=zaxis)
 
       # Here we create a legend:
       # we'll plot empty lists with the desired size and label
-      sizes = sorted(set(map(lambda t: t.url**3, aggregated_crawl_count.loc[domains_by_ncrawls].itertuples())))
+      sizes = sorted(set(map(lambda t: t.url**inflation_factor, aggregated_crawl_count.loc[domains_by_ncrawls].itertuples())))
       sizes.remove(0)
       for area in sizes:
-          ax.scatter([], [], color=scatter.cmap(0.7), s=area, label=str(math.ceil(area**(1/3))))
+          ax.scatter([], [], color=scatter.cmap(0.7), s=area, label=str(math.ceil(area**(1/inflation_factor ))))
       ax.legend(scatterpoints=1, loc="upper left",bbox_to_anchor=(1.025, 1), fancybox=True, frameon=True, shadow=True, handleheight=2.2,
                 borderaxespad=0., borderpad=1, labelspacing=3.5, handlelength=4, handletextpad=3,  title='Crawl count by size')    
 
