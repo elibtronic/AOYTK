@@ -87,3 +87,16 @@
     - Record demos (hopefully 4 for the presentation, two from SL, 1 from TR & FJ)
     - Slides for next week and demo vids
     - We'll all use the same [5000 sample](https://raw.githubusercontent.com/BrockDSL/ARCH_Data_Explore/main/niagara_sample.csv)
+
+## March 20
+
+  - IIPC Video has been pushed back to 24th
+  - 4/5 of the video is completed
+  - Fletcher shared good resource: https://github.com/blueprints-for-text-analytics-python/blueprints-text
+  - How to standardize pipeline for text processing (will discuss next time what that should look like)
+  - How to encapsulate into the object, how much to encapsulate it
+
+
+  - Next Steps
+    - TR will focus on finding journal title that will be a good place for a write-up
+    - SL will continue to work on notebooks, working with Colab Pro now instead of regular
