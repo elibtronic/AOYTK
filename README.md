@@ -15,7 +15,7 @@ Two options are available to get your data ready
 - Create your own derivative directly in the [ARCH interface](https://webdata.archive-it.org/ait/login) and save it to a folder in **Google Drive**
 - Create a _derivative_ of any `WARC` file you have using the AOY Derivative Creation Notebook, which will save it to **Google Drive** for use by the **Analysis** Notebooks. 
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/main/AOY_DerivativeGenerator.ipynb) - Derivative Generator
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BrockDSL/AOYTK/blob/SL/AOY_DerivativeGenerator.ipynb) - Derivative Generator
 
 ## Analysis
 
