@@ -1,4 +1,6 @@
 
+# Meeting Notes
+
 ## Jan 9
 
 - WAC2023
@@ -100,3 +102,14 @@
   - Next Steps
     - TR will focus on finding journal title that will be a good place for a write-up
     - SL will continue to work on notebooks, working with Colab Pro now instead of regular
+
+## March 27
+
+  - IIPC video has been completed and uploaded
+  - [JOSS](https://joss.theoj.org/) as journal venue we'll explore in May
+  - SL, 2 design considerations
+     - Save-State Paradigm SSP, will write developer doc describing how this works plus demo if possible 
+     - Stop word sets, and custom stop words will fold into SSP. Custom stopwords in a text file
+  - TR, 
+     - identify a WARC/dataset to build documentation on
+     - sample derviatves for each of the 4 Collection with exploratory Notebook
