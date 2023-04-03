@@ -1,4 +1,6 @@
 
+# Meeting Notes
+
 ## Jan 9
 
 - WAC2023
@@ -67,3 +69,47 @@
 - TR will look at the CSV output bug and put together prototype of GIT cells
 - Development will go on to the idea of 'branches'. FJ, SL, TR, will each create a different branch and work on that 
 
+
+## Feb 27
+ 
+ - SL, widget work and other things. Changes are pushed to a new branch, header to that csv, bug about dissappearing file
+ - TR, slides for IIPC, continue work on Topic Modelling
+
+- Next Steps
+  - Break down the slides etc. Who will demo what?
+  - Further work on 
+
+## March 6
+
+  - IIPC video is due on March 20
+  - SL derivative creation going well, functionality for headers has been added, graph
+  - TR did most of a topic modelling book, will get FJ to use the same as well.
+
+  - Next Steps
+    - Record demos (hopefully 4 for the presentation, two from SL, 1 from TR & FJ)
+    - Slides for next week and demo vids
+    - We'll all use the same [5000 sample](https://raw.githubusercontent.com/BrockDSL/ARCH_Data_Explore/main/niagara_sample.csv)
+
+## March 20
+
+  - IIPC Video has been pushed back to 24th
+  - 4/5 of the video is completed
+  - Fletcher shared good resource: https://github.com/blueprints-for-text-analytics-python/blueprints-text
+  - How to standardize pipeline for text processing (will discuss next time what that should look like)
+  - How to encapsulate into the object, how much to encapsulate it
+
+
+  - Next Steps
+    - TR will focus on finding journal title that will be a good place for a write-up
+    - SL will continue to work on notebooks, working with Colab Pro now instead of regular
+
+## March 27
+
+  - IIPC video has been completed and uploaded
+  - [JOSS](https://joss.theoj.org/) as journal venue we'll explore in May
+  - SL, 2 design considerations
+     - Save-State Paradigm SSP, will write developer doc describing how this works plus demo if possible 
+     - Stop word sets, and custom stop words will fold into SSP. Custom stopwords in a text file
+  - TR, 
+     - identify a WARC/dataset to build documentation on
+     - sample derviatves for each of the 4 Collection with exploratory Notebook

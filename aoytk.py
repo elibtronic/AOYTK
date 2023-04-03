@@ -5,9 +5,10 @@ import ipywidgets as widgets
 import requests
 import os
 import pandas as pd
-import re
 import matplotlib.pyplot as plt
 import numpy as np 
+import re
+from google.colab import drive
 from IPython.display import clear_output
 
 # Global path variable -- a default for Google Drive usage
@@ -262,14 +263,15 @@ class Analyzer:
     def __init__(self): 
         # initialize the data attribute to None -- should possibly be an empty dataframe? consult with appropriate design patterns
         self.data = None
-    
+        self.number_LDA_Topics = None
+        
     def set_data(self, datafile): 
       """ Sets the data attribute for the Analyzer. 
 
       Parses columns to appropriate types if applicable. 
 
       Args: 
-        datafile: the path to the datafile to analyze. 
+        datafile (str): the path to the datafile to analyze. 
       """
       self.data = pd.read_csv(datafile)
       
@@ -351,7 +353,7 @@ class Analyzer:
         print(f"There are {n_domains} different domains in the dataset. ")
         display(n_slider)
         display(out)
-    
+  
     def plot_3d_crawl_frequency(self, aggregated_crawl_count):
         """Creates a 3-dimensional plot of the crawl frequency in the passed dataframe.
 
@@ -582,3 +584,29 @@ class Analyzer:
         display(enter_button)
 
       display_options()
+
+###
+### Topic Modelling Additions
+###
+    def set_LDA_model_topics(self):
+      """ Sets the topic model number of topics for Analyzer Object
+      """
+      t_choice = widgets.BoundedIntText(
+        value = 5,
+        min = 2,
+        max = 25,
+        step = 1,
+        #description = "How many topics for LDA Model?",
+        disabled = False,
+      )
+      t_Button = widgets.Button(description = "Set")
+      
+
+      def btn_set_topics(btn): 
+          self.number_LDA_Topics = t_choice.value
+          print("Topics Set... Ready to prepare model")
+      t_label = widgets.Label("Topics    ")
+      t_Button.on_click(btn_set_topics)
+      display(widgets.HBox([t_label, t_choice,t_Button]))
+
+
