@@ -113,3 +113,9 @@
   - TR, 
      - identify a WARC/dataset to build documentation on
      - sample derviatves for each of the 4 Collection with exploratory Notebook
+
+## April 3
+
+  - SL, first draft of [design notes](https://github.com/BrockDSL/AOYTK/blob/main/design_notes.md), will continue on code development
+  - TR, will inquiry about timelines for MoM
+
