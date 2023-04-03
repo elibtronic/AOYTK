@@ -433,10 +433,7 @@ class Analyzer:
       import math 
       fig, ax = plt.subplots(figsize=(18,12))
       crawl_dates = sorted(set(aggregated_crawl_count.index.get_level_values('crawl_date').to_pydatetime()))
-      cd_to_xtick = {d:i for i,d in enumerate(crawl_dates)}
-      reverse_cd_map = {i:d for i,d in enumerate(crawl_dates)}
       domains_by_ncrawls = aggregated_crawl_count.groupby(level=0).sum().url.sort_values().index
-      domains_by_ncrawls = domains_by_ncrawls[:-1]
 
       max_crawl_count = 0
       y = -1
@@ -447,12 +444,11 @@ class Analyzer:
 
         for t in aggregated_crawl_count.loc[d].sort_index().itertuples():
           tstamp = t.Index.to_pydatetime()
-          tstamp_int = cd_to_xtick[tstamp]
           crawl_count = t.url
           max_crawl_count = max(crawl_count, max_crawl_count)
 
           xaxis.append(tstamp)
-          zaxis.append(crawl_count**inflation_factor ) #artificially inflate size to create larger circles
+          zaxis.append(crawl_count**inflation_factor) #artificially inflate size to create larger circles
         scatter = ax.scatter(xaxis,[d]*len(xaxis),s=zaxis)
 
       # Here we create a legend:
@@ -512,7 +508,10 @@ class Analyzer:
       elif graph_type == "2D": 
         self.plot_2d_crawl_frequency(aggregated_crawl_count)
       else: 
-         print(f"{graph_type} is not a supported graph type. Please choose either '2d' or '3d'.")
+         print(f"{graph_type} is not a supported graph type. Please choose either '2D' or '3D'.")
+
+      # temp
+      return aggregated_crawl_count
 
     def display_crawl_frequency(self): 
       # set-up two panes so we can clear the output of the graphs
