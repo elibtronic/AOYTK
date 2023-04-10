@@ -119,3 +119,7 @@
   - SL, first draft of [design notes](https://github.com/BrockDSL/AOYTK/blob/main/design_notes.md), will continue on code development
   - TR, will inquiry about timelines for MoM
 
+## April 10
+
+  - SL, working on a notebook for word cloud construction
+  - TR, will setup new contract until end of Summer, meeting schedule for Summer all done
