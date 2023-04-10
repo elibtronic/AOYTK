@@ -8,7 +8,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np 
 import re
-from google.colab import drive
 from IPython.display import clear_output
 
 # Global path variable -- a default for Google Drive usage
@@ -263,7 +262,13 @@ class Analyzer:
     def __init__(self): 
         # initialize the data attribute to None -- should possibly be an empty dataframe? consult with appropriate design patterns
         self.data = None
+        self.data_loaded = False
         self.number_LDA_Topics = None
+
+        # change display settings for pandas to show more content 
+        pd.set_option('display.max_colwidth', 100)
+        # pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', 200) 
         
     def set_data(self, datafile): 
       """ Sets the data attribute for the Analyzer. 
@@ -274,6 +279,7 @@ class Analyzer:
         datafile (str): the path to the datafile to analyze. 
       """
       self.data = pd.read_csv(datafile)
+      self.data_loaded = True
       
       # if the crawl_date column is included on the frame, make it a date
       if "crawl_date" in list(self.data): 
@@ -585,6 +591,31 @@ class Analyzer:
 
       display_options()
 
+    def display_search(self, field = "url"):
+      """Allows the user to search the dataframe for rows containing specified string. 
+
+      Args:
+        field: the label of a str-type field to search. By default, searches URL field, 
+               could also be used to search the domain field or the text field etc. 
+      """
+      if self.data_loaded != True: 
+        print("Please load data first using the 'load_data()' function. ")
+        return
+      # note: only works with "str" type fields 
+      # remove pages with no text content
+      df = self.data[self.data['content'].notnull()]
+      
+      def reduce(q, field):
+        subset = df.loc[lambda d: d[field].str.contains(q)]
+        display(subset)
+
+      description = widgets.Label(f"Search for entires with '{field}' containing the following: ")
+      q = widgets.Text()
+      out = widgets.interactive_output(reduce, {'q': q, 'field' : widgets.fixed(field)})
+
+      display(widgets.VBox([description, q, out]))
+
+
 ###
 ### Topic Modelling Additions
 ###
@@ -608,5 +639,6 @@ class Analyzer:
       t_label = widgets.Label("Topics    ")
       t_Button.on_click(btn_set_topics)
       display(widgets.HBox([t_label, t_choice,t_Button]))
+
 
 
