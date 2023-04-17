@@ -123,3 +123,11 @@
 
   - SL, working on a notebook for word cloud construction
   - TR, will setup new contract until end of Summer, meeting schedule for Summer all done
+
+## April 17
+
+  - TR, 
+    - Contact should be in place, DB invited to rest of meeting
+    - More on versioning and Python package versions for next week
+  - SL, more work on widgets completed
+    - will continue on text analysis notebooks
