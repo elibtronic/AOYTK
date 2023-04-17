@@ -609,7 +609,7 @@ class Analyzer:
         subset = df.loc[lambda d: d[field].str.contains(q)]
         display(subset)
 
-      description = widgets.Label(f"Search for entires with '{field}' containing the following: ")
+      description = widgets.Label(f"Search for entries with '{field}' containing the following: ")
       q = widgets.Text()
       out = widgets.interactive_output(reduce, {'q': q, 'field' : widgets.fixed(field)})
 
