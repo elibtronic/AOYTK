@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 import numpy as np 
 import re
 from IPython.display import clear_output
+import spacy 
+from wordcloud import WordCloud
+import random
 
 # Global path variable -- a default for Google Drive usage
 path = "/content/drive/MyDrive/AOY/" # default path, can be overwritten by the path-setter widget
@@ -614,6 +617,205 @@ class Analyzer:
       out = widgets.interactive_output(reduce, {'q': q, 'field' : widgets.fixed(field)})
 
       display(widgets.VBox([description, q, out]))
+
+
+    # Word Cloud Functions // Text Analysis Helpers 
+    def get_document_token_list(self, doc, lemmatize=False, remove_punct=False, remove_stop=False, lowercase=True):
+      '''Given a spaCy doc, return it as a list of string tokens
+      Args:
+          doc: the spaCy doc object produced by processing the document through the nlp pipeline
+          lemmatize: boolean, whether or not to lemmatize tokens (convert them to their base word ex. buying, bought, buys -> buy)
+          remove_punct: boolean, whether or not to remove punctuation like '.' ',' etc. should not affect punctuation like COVID-19)
+          remove_stop: boolean, whether or not to remove stop words. 
+                              currently uses spaCy's stopword list. 
+                              ideally this would be altered to accept None or a specified list
+          lower: boolean, whether or not to convert all tokens to lowercase
+      Returns: 
+          tokens: list of the string tokens from the document
+          id: the document id, from the doc._.text_id attribute of the spaCy Doc
+      '''
+      id = doc._.text_id # save the id 
+
+      # this code should be re-written at some point
+      if remove_stop: 
+          doc = [token for token in doc if not token.is_stop]
+      if not lemmatize:
+          if remove_punct: 
+              tokens = [token for token in doc if not token.is_punct]
+          else: 
+              tokens = [token for token in doc]
+      else: 
+          if remove_punct: 
+              tokens = [token.lemma_ for token in doc if not token.is_punct]
+          else: 
+              tokens = [token.lemma_ for token in doc]
+      if lowercase: 
+          tokens = [token.lower_ for token in tokens]
+      else:
+          tokens = [token for token in tokens]
+      return tokens, id
+
+    # ideally, the stopwords parameter would let you specify what stopwords list to use, 
+    # for now it's a yes/no for using spaCy's stopwords list
+    def preprocess_content(self, dataframe, lemmatize=False, remove_punct=False, remove_stop=False, lowercase=True): 
+        '''Preprocesses the webpage data from the provided dataframe
+          Updates dataframe with additional information for each entry (length, readability scores) 
+          Returns tokenized content for further assessment/evaluation
+          Args:
+                dataframe: DataFrame containing all relevant information for scrapes of a given URL
+                Preprocessing option arguments: 
+                    lemmatize: boolean, whether or not to apply lemmatization to the text of the webpages
+                    remove_punct: boolean, whether or not to remove punctuation (like '.' ',' etc. should not affect punctuation like COVID-19)
+                    remove_stop: boolean, whether or not to remove stop words. 
+                                currently uses spaCy's stopword list. 
+                                ideally this would be altered to accept None or a specified list
+                    lowercase: boolean, whether or not to convert tokens to lowercase
+          Return:
+                Tokenized documents as a list of tuples of the form [([document_tokens], document_id)] 
+                where [document_tokens] is a list of spaCy token objects
+                A new pandas dataframe with the added information
+        '''
+        nlp = spacy.load("en_core_web_md")
+        if "sentencizer" not in nlp.pipe_names:
+            nlp.add_pipe("sentencizer")
+
+        # ensure documents contain the id of their dataframe row so they can be matched up later
+        from spacy.tokens import Doc
+        # if there is no registered extension, set one
+        if not Doc.has_extension("text_id"):
+            Doc.set_extension("text_id", default=None)
+
+        # create the text tuples to add the text_id to the documents
+        text_tuples = []
+        for id, text in dataframe.content.items():
+            text_tuples.append((text, id))
+
+        # process the tuples using nlp.pipe 
+        # (disabling the components that we don't currently use to save time) 
+        # we may choose to use tok2vec at some point in the future, at which point we can reenable it
+        doc_tuples = nlp.pipe(text_tuples, as_tuples=True, disable=["tok2vec", "parser"])
+
+        docs = [] # list of all documents, including their ids in ._.text_id
+        for doc, id in doc_tuples: 
+            doc._.text_id = id
+            docs.append(doc)
+
+        # extract lists of tokens
+        token_docs = []
+        for doc in docs:
+            # bundle the text ids with the documents
+            token_doc, id = self.get_document_token_list(doc, lemmatize = lemmatize, 
+                                                    remove_punct = remove_punct, 
+                                                    remove_stop = remove_stop, 
+                                                    lowercase = lowercase)
+            token_docs.append((token_doc,id)) 
+        return dataframe, token_docs
+
+    def get_token_freq(self, token_docs, data):
+        '''Creates a dictionary of dictionaries with the frequency of the tokens from the token docs
+        Args: 
+            token_docs: the list of (tokenized_document, text_id) tuples to process
+            data: the dataframe from which the token docs were generated
+        Returns: 
+            dictionary of dictionaries where the key to the outer dictionary is the 
+                text id and the inner dictionary is token_string : frequency pairs
+                {id: {token_string : frequency}}
+        '''
+        doc_freqs = dict()
+        for doc, id in token_docs: 
+            freqs = dict()
+            for token in doc: 
+                t = token.lower()
+                if t in freqs.keys(): 
+                    freqs[t] += 1
+                else: 
+                    freqs[t] = 1
+            # this is probably a very strange way of doing this, but for consistent access, 
+            # this sets the date as the key for the dictionary
+            # NOTE: if we have a dataset with multiple scrapes in a day, this is not 
+            #       a valid technique and would need to be amended 
+            doc_freqs[str(data.at[id, 'crawl_date']).split(" ")[0]] = freqs
+        return doc_freqs
+
+    def create_wordcloud_from_terms(self, term_freq): 
+        '''This function creates and displays a simple grey Word Cloud from a 
+          list of term frequencies
+        Args: 
+            term_freq: the term frequencies to be used to generate the cloud
+                      designed to work for either a TF-IDF vector or a dictionary of raw term frequencies
+        '''
+        # recolouring function for now just greys 
+        def grey_color_func(word, font_size, position, orientation, random_state=None,
+                            **kwargs):
+            return "hsl(0, 0%%, %d%%)" % random.randint(1, 45)
+
+        cloud = WordCloud(background_color="white").generate_from_frequencies(term_freq)
+        plt.imshow(cloud.recolor(color_func=grey_color_func, random_state=3))
+        plt.axis("off")
+        plt.show()
+
+    def display_wordcloud_options(self):
+      df = self.data.dropna(subset = "content")
+      domains = list(df["domain"].value_counts().index)
+
+      domain = widgets.Dropdown(options = domains, description = "Domain: ")
+
+      domain_set = df[df["domain"] == domain.value]
+      url = widgets.Dropdown(options = domain_set["url"], description = "URL:")
+      scrapes = domain_set[domain_set["url"] == url.value]
+      date = widgets.Dropdown(options = scrapes["crawl_date"].dt.date, description = "Crawl date:")
+
+      def dropdown_handler_domain(change):
+          global domain_set
+          domain_set = df[df["domain"] == str(change.new)]
+          urls = domain_set["url"]
+          url.options = urls
+
+      def dropdown_handler_url(change): 
+          global domain_set 
+          page_set = domain_set[domain_set["url"] == str(change.new)]
+          scrapes = page_set["crawl_date"].dt.date
+          date.options = scrapes
+          
+      domain.observe(dropdown_handler_domain, names='value')
+      url.observe(dropdown_handler_url, names='value')
+
+      # preprocessing options 
+      # lemmatize_opt = widgets.Checkbox(value = False, description = "Lemmatize words")
+      remove_punct_opt = widgets.Checkbox(value = False, description = "Remove punctation")
+      remove_stop_opt = widgets.Checkbox(value = False, description = "Remove stopwords")
+      preprocess_options_label = widgets.Label("Text preprocessing options: ")
+
+      def wordcloud_btn_handler(btn): 
+        global domain_set
+        # get settings 
+        crawl_date = date.value
+        crawl_date = crawl_date.strftime('%Y-%m-%d')
+        # preprocess 
+        print("Processing data... (this may take a few minutes)")
+        df, token_docs = self.preprocess_content(domain_set, 
+                                            # lemmatize = lemmatize_opt.value, 
+                                            remove_punct = remove_punct_opt.value, 
+                                            remove_stop = remove_stop_opt.value)
+        doc_freqs = self.get_token_freq(token_docs, df)
+        # display 
+        print("Creating Word Cloud ... ")
+        self.create_wordcloud_from_terms(doc_freqs[crawl_date])
+
+
+      wordcloud_btn = widgets.Button(description = "Create Word Cloud")
+      wordcloud_btn.on_click(wordcloud_btn_handler)
+
+      display(domain)
+      display(url)
+      display(date)
+
+      display(preprocess_options_label)
+      # display(lemmatize_opt)
+      display(remove_punct_opt)
+      display(remove_stop_opt)
+
+      display(wordcloud_btn)
 
 
 ###
