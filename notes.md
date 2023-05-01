@@ -131,3 +131,10 @@
     - More on versioning and Python package versions for next week
   - SL, more work on widgets completed
     - will continue on text analysis notebooks
+
+## May 1
+
+  - Last minute details for IIPC
+  - New contract seems to be OK
+  - Demo of Wordcloud
+  - LLMs as notebook source?
