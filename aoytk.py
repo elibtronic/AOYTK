@@ -736,8 +736,45 @@ class Analyzer:
             #       a valid technique and would need to be amended 
             doc_freqs[str(data.at[id, 'crawl_date']).split(" ")[0]] = freqs
         return doc_freqs
+    
+    def identity_tokenizer(self, text):
+      return text 
 
-    def create_wordcloud_from_terms(self, term_freq): 
+    def get_tfidf_vectors(self, tokenized_docs_list, base_dataframe): 
+      ''' This method calculates the TF-IDF matrix for the provided list of documents
+      Args:
+          tokenized_docs_list: a list of lists of the form [([tokens], id)] where 
+              [tokens] is the list of string tokens in the document
+              id is the text_id of the document that can be used to match it up 
+                  with its original entry in the dataframe
+          base_dataframe: this is the pandas dataframe that we are matching our doc
+              ids back to
+      Returns: 
+          A new pandas dataframe representing the TF-IDF matrix for the 
+          provided documents. The rows of this matrix are the terms, and the columns
+          are the dates from the original dataframe 
+      '''
+      from sklearn.feature_extraction.text import TfidfVectorizer
+      tfidf = TfidfVectorizer(tokenizer = self.identity_tokenizer, lowercase = False)
+      # extract the text_ids
+      ids = []
+      docs = []
+      for doc, id in tokenized_docs_list:
+          docs.append(doc)
+          ids.append(id)
+      # calculate the tf-idf matrix
+      tfidf_docs = tfidf.fit_transform(docs)
+      tfidf_docs_arr = tfidf_docs.toarray()
+      df = pd.DataFrame(tfidf_docs_arr, columns=tfidf.get_feature_names_out())
+      df = df.transpose()
+      # match up the documents with the original crawl dates
+      col_names = []
+      for index in ids:
+          col_names.append(base_dataframe.at[index, 'crawl_date'])
+      df.columns = col_names
+      return df
+
+    def create_wordcloud_from_terms(self, term_freq, height = 640, width = 480, title = ""): 
         '''This function creates and displays a simple grey Word Cloud from a 
           list of term frequencies
         Args: 
@@ -752,9 +789,15 @@ class Analyzer:
         cloud = WordCloud(background_color="white").generate_from_frequencies(term_freq)
         plt.imshow(cloud.recolor(color_func=grey_color_func, random_state=3))
         plt.axis("off")
+        fig = plt.gcf()
+        fig.set_dpi(100)
+        fig.set_size_inches(height / 100, width / 100)
+        fig.suptitle(title)
         plt.show()
 
     def display_wordcloud_options(self):
+      """
+      """
       df = self.data.dropna(subset = "content")
       domains = list(df["domain"].value_counts().index)
 
@@ -786,6 +829,24 @@ class Analyzer:
       remove_stop_opt = widgets.Checkbox(value = False, description = "Remove stopwords")
       preprocess_options_label = widgets.Label("Text preprocessing options: ")
 
+      wordcloud_options_layout = widgets.VBox([domain, url, date, preprocess_options_label, remove_punct_opt, remove_stop_opt])
+
+      # make the figure settings widgets 
+      label_plot_setting = widgets.Label("Plot settings")
+      # height 
+      plot_height = widgets.IntText(value = 640, description = "Height (px)")
+      # width
+      plot_width = widgets.IntText(value = 480, description = "Width (px)")
+      # title
+      plot_title = widgets.Text(description = "Title")
+
+      plot_settings_box = widgets.VBox([plot_height, plot_width, plot_title])
+      plot_set_layout = widgets.VBox([label_plot_setting, plot_settings_box])
+
+      # make the tab display 
+      tab = widgets.Tab(children = [wordcloud_options_layout, plot_set_layout])
+      [tab.set_title(i, title) for i, title in enumerate(["Wordcloud Settings", "Plot Settings"])]
+
       def wordcloud_btn_handler(btn): 
         global domain_set
         # get settings 
@@ -797,24 +858,18 @@ class Analyzer:
                                             # lemmatize = lemmatize_opt.value, 
                                             remove_punct = remove_punct_opt.value, 
                                             remove_stop = remove_stop_opt.value)
+        
+
         doc_freqs = self.get_token_freq(token_docs, df)
         # display 
         print("Creating Word Cloud ... ")
-        self.create_wordcloud_from_terms(doc_freqs[crawl_date])
-
+        self.create_wordcloud_from_terms(doc_freqs[crawl_date], height = plot_height.value, width = plot_width.value, title = plot_title.value)
 
       wordcloud_btn = widgets.Button(description = "Create Word Cloud")
       wordcloud_btn.on_click(wordcloud_btn_handler)
 
-      display(domain)
-      display(url)
-      display(date)
-
-      display(preprocess_options_label)
-      # display(lemmatize_opt)
-      display(remove_punct_opt)
-      display(remove_stop_opt)
-
+      # display the tab + button 
+      display(tab)
       display(wordcloud_btn)
 
 
