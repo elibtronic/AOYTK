@@ -43,6 +43,6 @@ If you don't like the Colab environment CSV representations of your data will be
 
 ## Documentation
 
-[Tutorials]() - Comprehensive look at the steps involved in going from Web Archive to Completed Analysis
+[About](html/about.md) - A quick look at the project.
 
 [API Docs](html/aoytk.md) - Listing of all of the objects and functions in the **aoytk** object 
