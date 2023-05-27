@@ -636,24 +636,43 @@ class Analyzer:
       '''
       id = doc._.text_id # save the id 
 
-      # this code should be re-written at some point
       if remove_stop: 
           doc = [token for token in doc if not token.is_stop]
-      if not lemmatize:
-          if remove_punct: 
-              tokens = [token for token in doc if not token.is_punct]
-          else: 
-              tokens = [token for token in doc]
+
+      if remove_punct: 
+          doc = [token for token in doc if not token.is_punct]
+
+      if lemmatize: 
+         doc = [token.lemma_ for token in doc]
+         if lowercase: 
+            doc = [token.lower() for token in doc]
       else: 
-          if remove_punct: 
-              tokens = [token.lemma_ for token in doc if not token.is_punct]
-          else: 
-              tokens = [token.lemma_ for token in doc]
-      if lowercase: 
-          tokens = [token.lower_ for token in tokens]
-      else:
-          tokens = [token for token in tokens]
-      return tokens, id
+         if lowercase: 
+            doc = [token.lower_ for token in doc]
+
+      # ensure that the tokens are converted to strings before returning 
+      # necessary if not lemmatizing or lowering
+      for token in doc: 
+         if not isinstance(token, str): 
+            token = token.text
+
+      return doc, id 
+    
+      # if not lemmatize:
+      #     if remove_punct: 
+      #         tokens = [token for token in doc if not token.is_punct]
+      #     else: 
+      #         tokens = [token for token in doc]
+      # else: 
+      #     if remove_punct: 
+      #         tokens = [token.lemma_ for token in doc if not token.is_punct]
+      #     else: 
+      #         tokens = [token.lemma_ for token in doc]
+      # if lowercase: 
+      #     tokens = [token.lower_ for token in tokens]
+      # else:
+      #     tokens = [token for token in tokens]
+      # return tokens, id
 
     # ideally, the stopwords parameter would let you specify what stopwords list to use, 
     # for now it's a yes/no for using spaCy's stopwords list
@@ -794,6 +813,7 @@ class Analyzer:
         fig.set_size_inches(height / 100, width / 100)
         fig.suptitle(title)
         plt.show()
+        return plt
 
     def display_wordcloud_options(self):
       """
@@ -824,12 +844,12 @@ class Analyzer:
       url.observe(dropdown_handler_url, names='value')
 
       # preprocessing options 
-      # lemmatize_opt = widgets.Checkbox(value = False, description = "Lemmatize words")
+      lemmatize_opt = widgets.Checkbox(value = False, description = "Lemmatize words")
       remove_punct_opt = widgets.Checkbox(value = False, description = "Remove punctation")
       remove_stop_opt = widgets.Checkbox(value = False, description = "Remove stopwords")
       preprocess_options_label = widgets.Label("Text preprocessing options: ")
 
-      wordcloud_options_layout = widgets.VBox([domain, url, date, preprocess_options_label, remove_punct_opt, remove_stop_opt])
+      wordcloud_options_layout = widgets.VBox([domain, url, date, preprocess_options_label, remove_punct_opt, remove_stop_opt, lemmatize_opt])
 
       # make the figure settings widgets 
       label_plot_setting = widgets.Label("Plot settings")
@@ -847,6 +867,7 @@ class Analyzer:
       tab = widgets.Tab(children = [wordcloud_options_layout, plot_set_layout])
       [tab.set_title(i, title) for i, title in enumerate(["Wordcloud Settings", "Plot Settings"])]
 
+
       def wordcloud_btn_handler(btn): 
         global domain_set
         # get settings 
@@ -855,7 +876,7 @@ class Analyzer:
         # preprocess 
         print("Processing data... (this may take a few minutes)")
         df, token_docs = self.preprocess_content(domain_set, 
-                                            # lemmatize = lemmatize_opt.value, 
+                                            lemmatize = lemmatize_opt.value, 
                                             remove_punct = remove_punct_opt.value, 
                                             remove_stop = remove_stop_opt.value)
         
