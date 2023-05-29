@@ -813,7 +813,6 @@ class Analyzer:
         fig.set_size_inches(height / 100, width / 100)
         fig.suptitle(title)
         plt.show()
-        return plt
 
     def display_wordcloud_options(self):
       """
@@ -823,19 +822,18 @@ class Analyzer:
 
       domain = widgets.Dropdown(options = domains, description = "Domain: ")
 
-      domain_set = df[df["domain"] == domain.value]
+      # initial value for the domain set
+      domain_set = df[df["domain"] == domains[0]]
       url = widgets.Dropdown(options = domain_set["url"], description = "URL:")
       scrapes = domain_set[domain_set["url"] == url.value]
       date = widgets.Dropdown(options = scrapes["crawl_date"].dt.date, description = "Crawl date:")
 
       def dropdown_handler_domain(change):
-          global domain_set
           domain_set = df[df["domain"] == str(change.new)]
           urls = domain_set["url"]
           url.options = urls
 
-      def dropdown_handler_url(change): 
-          global domain_set 
+      def dropdown_handler_url(change):  
           page_set = domain_set[domain_set["url"] == str(change.new)]
           scrapes = page_set["crawl_date"].dt.date
           date.options = scrapes
@@ -869,7 +867,6 @@ class Analyzer:
 
 
       def wordcloud_btn_handler(btn): 
-        global domain_set
         # get settings 
         crawl_date = date.value
         crawl_date = crawl_date.strftime('%Y-%m-%d')
