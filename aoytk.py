@@ -143,8 +143,9 @@ class DerivativeGenerator:
           for row in reader: 
             writer.writerow(row)
 
+
     # a messy first guess at derivative generation
-    def generate_derivative(self, source_file, output_folder, file_type="csv", text_filters=0):
+    def generate_derivative(self, source_file, output_folder, file_type = "csv", deriv_type = "text",  text_filters = 0, file_category = "image"):
         """Create a text derivative file from the specified source file.
 
         Create a text derivative from the specified W/ARC source file, using the output settings specified. 
@@ -167,22 +168,101 @@ class DerivativeGenerator:
         # create our WebArchive object from the W/ARC file
         archive = WebArchive(self.sc, self.sqlContext, source_file)
 
-        if text_filters == 0: 
-            content = remove_html("content")
-        elif text_filters == 1: 
-            content = remove_html(remove_http_header("content"))
-        else: 
-            content = extract_boilerplate(remove_http_header("content")).alias("content")
+        if deriv_type == "text": 
+          if text_filters == 0: 
+              content = remove_html("content")
+          elif text_filters == 1: 
+              content = remove_html(remove_http_header("content"))
+          else: 
+              content = extract_boilerplate(remove_http_header("content")).alias("content")
 
-        archive.webpages() \
-            .select("crawl_date", "domain", "url", content) \
-            .write \
-            .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
-            .format(file_type) \
-            .option("escape", "\"") \
-            .option("encoding", "utf-8") \
-            .save(output_folder)
+          archive.webpages() \
+              .select("crawl_date", "domain", "url", content) \
+              .write \
+              .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
+              .format(file_type) \
+              .option("escape", "\"") \
+              .option("encoding", "utf-8") \
+              .save(output_folder)
+        
+        elif deriv_type == "file": 
+            if file_category == "audio": 
+                # get the audio derivative -- following the format from AUT
+                archive.audio() \
+                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1") \
+                  .write \
+                  .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
+                  .format(file_type) \
+                  .option("escape", "\"") \
+                  .option("encoding", "utf-8") \
+                  .save(output_folder)
 
+            elif file_category == "image": 
+                # get the image derivative -- following the format from AUT
+                archive.images()\
+                  .select("crawl_date", "url", "filename", "extension", "width", "height", "md5", "sha1")\
+                  .write \
+                  .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
+                  .format(file_type) \
+                  .option("escape", "\"") \
+                  .option("encoding", "utf-8") \
+                  .save(output_folder)
+                
+            elif file_category == "pdfs": 
+                archive.pdfs()\
+                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .write \
+                  .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
+                  .format(file_type) \
+                  .option("escape", "\"") \
+                  .option("encoding", "utf-8") \
+                  .save(output_folder)
+                
+            elif file_category == "presentations": 
+                archive.presentation_program()\
+                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .write \
+                  .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
+                  .format(file_type) \
+                  .option("escape", "\"") \
+                  .option("encoding", "utf-8") \
+                  .save(output_folder)
+                
+            elif file_category == "spreadsheets": 
+                archive.spreadsheets()\
+                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .write \
+                  .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
+                  .format(file_type) \
+                  .option("escape", "\"") \
+                  .option("encoding", "utf-8") \
+                  .save(output_folder)
+                
+            elif file_category == "videos": 
+                archive.video()\
+                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .write \
+                  .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
+                  .format(file_type) \
+                  .option("escape", "\"") \
+                  .option("encoding", "utf-8") \
+                  .save(output_folder)
+                
+            elif file_category == "wordProcessor":
+                archive.word_processor()\
+                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .write \
+                  .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
+                  .format(file_type) \
+                  .option("escape", "\"") \
+                  .option("encoding", "utf-8") \
+                  .save(output_folder)
+                
+            else: 
+              print(f"Unsupported file category: {file_category}. ")
+              return False
+            
+        
         # rename the datafile to have a meaningful title, remove the success file
         success = False
         # the folder will contain exactly 2 files, a _SUCCESS file and the resulting datafile
@@ -201,8 +281,13 @@ class DerivativeGenerator:
                   headers = []
                   # for all text_filters between 0 and 2, we'll use the same header
                   # if adding different derivatives, add the appropriate headers here! 
-                  if text_filters >= 0 and text_filters <= 2: 
+                  if deriv_type == "text" and text_filters >= 0 and text_filters <= 2: 
                     headers = ["crawl_date", "domain", "url", "content"]
+                  elif deriv_type == "file": 
+                    if file_category == "image": 
+                       headers = ["crawl_date", "url", "filename", "extension", "width", "height", "md5", "sha1"]
+                    else: 
+                       headers = ["crawl_date", "url", "filename", "extension", "md5", "sha1"]
                   output_path = output_folder + source_file_name + ".csv"
                   self.create_csv_with_header(headers, f.path, output_path)
                   os.remove(f.path)
@@ -222,6 +307,7 @@ class DerivativeGenerator:
         Also displays a button which, on-click, will run generate_derivative(), 
         passing in the settings specified in the form. 
         """
+
         # file picker for W/ARC files in the specified folder
         data_files = get_files(path, (".warc", ".arc", "warc.gz", ".arc.gz"))
         file_options = widgets.Dropdown(description="W/ARC file:", options =  data_files)
@@ -231,7 +317,10 @@ class DerivativeGenerator:
         content_options = ["All text content", "Text content without HTTP headers", "Text content without boilerplate"]
         content_choice = widgets.Dropdown(description="Content:", options=content_options)
         content_val = content_options.index(content_choice.value)
-        button = widgets.Button(description="Create derivative")
+        text_button = widgets.Button(description="Create derivative")
+
+        # text deriv options layout 
+        text_deriv_layout = widgets.VBox([file_options, out_text, format_choice, content_choice, text_button])
 
         # this function is defined here in order to keep the other form elements 
         # in-scope and therefore allow for the reading of their values
@@ -246,16 +335,13 @@ class DerivativeGenerator:
             output_location = path + "/" + out_text.value
             content_val = content_options.index(content_choice.value)
             print("Creating derivative file... (this may take several minutes)")
-            if self.generate_derivative(input_file, output_location, format_choice.value, content_val):
+            if self.generate_derivative(input_file, output_location, file_type = format_choice.value, deriv_type = "text", text_filters = content_val):
                 print("Derivative generated, saved to: " + output_location)
             else: 
                 print("An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.")
-        button.on_click(btn_create_deriv)
-        display(file_options)
-        display(out_text)
-        display(format_choice)
-        display(content_choice)
-        display(button)
+
+        text_button.on_click(btn_create_deriv)
+        display(text_deriv_layout)
 
 
 class Analyzer: 
@@ -914,6 +1000,3 @@ class Analyzer:
       t_label = widgets.Label("Topics    ")
       t_Button.on_click(btn_set_topics)
       display(widgets.HBox([t_label, t_choice,t_Button]))
-
-
-
