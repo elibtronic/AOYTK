@@ -145,7 +145,7 @@ class DerivativeGenerator:
 
 
     # a messy first guess at derivative generation
-    def generate_derivative(self, source_file, output_folder, file_type = "csv", deriv_type = "text",  text_filters = 0, file_category = "image"):
+    def generate_derivative(self, source_file, output_folder, file_type = "csv", deriv_type = "text",  text_filters = 0, file_category = "images"):
         """Create a text derivative file from the specified source file.
 
         Create a text derivative from the specified W/ARC source file, using the output settings specified. 
@@ -197,7 +197,7 @@ class DerivativeGenerator:
                   .option("encoding", "utf-8") \
                   .save(output_folder)
 
-            elif file_category == "image": 
+            elif file_category == "images": 
                 # get the image derivative -- following the format from AUT
                 archive.images()\
                   .select("crawl_date", "url", "filename", "extension", "width", "height", "md5", "sha1")\
@@ -248,7 +248,7 @@ class DerivativeGenerator:
                   .option("encoding", "utf-8") \
                   .save(output_folder)
                 
-            elif file_category == "wordProcessor":
+            elif file_category == "word processor":
                 archive.word_processor()\
                   .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
                   .write \
@@ -284,7 +284,7 @@ class DerivativeGenerator:
                   if deriv_type == "text" and text_filters >= 0 and text_filters <= 2: 
                     headers = ["crawl_date", "domain", "url", "content"]
                   elif deriv_type == "file": 
-                    if file_category == "image": 
+                    if file_category == "images": 
                        headers = ["crawl_date", "url", "filename", "extension", "width", "height", "md5", "sha1"]
                     else: 
                        headers = ["crawl_date", "url", "filename", "extension", "md5", "sha1"]
@@ -312,7 +312,7 @@ class DerivativeGenerator:
         data_files = get_files(path, (".warc", ".arc", "warc.gz", ".arc.gz"))
         file_options = widgets.Dropdown(description="W/ARC file:", options =  data_files)
         out_text = widgets.Text(description="Output folder:", value="output/")
-        format_choice = widgets.Dropdown(description="File type:",options=["csv", "parquet"], value="csv")
+        format_choice = widgets.Dropdown(description="Output file type:",options=["csv", "parquet"], value="csv")
         # text content choices 
         content_options = ["All text content", "Text content without HTTP headers", "Text content without boilerplate"]
         content_choice = widgets.Dropdown(description="Content:", options=content_options)
@@ -321,6 +321,13 @@ class DerivativeGenerator:
 
         # text deriv options layout 
         text_deriv_layout = widgets.VBox([file_options, out_text, format_choice, content_choice, text_button])
+
+        file_content_options = ["audio", "images", "pdfs", "presentations", "spreadsheets", "videos", "word processor"]
+        file_content_choice = widgets.Dropdown(description="File types:", options = file_content_options)
+        file_button = widgets.Button(description="Create derivative")
+
+        file_deriv_layout = widgets.VBox([file_options, out_text, format_choice, file_content_choice, file_button])
+
 
         # this function is defined here in order to keep the other form elements 
         # in-scope and therefore allow for the reading of their values
@@ -340,8 +347,27 @@ class DerivativeGenerator:
             else: 
                 print("An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.")
 
+        def btn_create_file_deriv(btn):
+           """On-click function for the create file derivative button. 
+
+            Retrieves the values from the other inputs on the form and passes them to 
+            generate_derivative() to create a derivative file using the selected settings. 
+            """
+           input_file = path + "/" + file_options.value
+           output_location = path + "/" + out_text.value
+           print("Creating derivative file... (this may take several minutes)")
+           if self.generate_derivative(input_file, output_location, file_type = format_choice.value, deriv_type = "file", file_category = file_content_choice.value):
+              print("Derivative generated, saved to: " + output_location)
+           else: 
+              print("An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.")
+
         text_button.on_click(btn_create_deriv)
-        display(text_deriv_layout)
+        file_button.on_click(btn_create_file_deriv)
+
+        # make the tab display
+        tab = widgets.Tab(children = [text_deriv_layout, file_deriv_layout])
+        [tab.set_title(i, title) for i, title in enumerate(["Text Derivatives", "File Type Derivatives"])]
+        display(tab)
 
 
 class Analyzer: 
