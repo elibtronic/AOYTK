@@ -134,21 +134,33 @@ class DerivativeGenerator:
         datafile: the path of the CSV file, without headers, to add headers to
         outputfile: the path of the desired output file 
       """
+      # change the field size to accommodate large data
       import csv
+      import sys
+      maxInt = sys.maxsize
+      while True:
+          # decrease the maxInt value by factor 10 
+          # as long as the OverflowError occurs.
+
+          try:
+              csv.field_size_limit(maxInt)
+              break
+          except OverflowError:
+              maxInt = int(maxInt/10)
+
       with open(outputfile, "w", newline = "") as csvfile: 
-        writer = csv.writer(csvfile, delimiter=",")
+        writer = csv.writer(csvfile, delimiter=",", quoting = csv.QUOTE_MINIMAL)
         writer.writerow(headers)
         with open(datafile, "r") as datafile: 
-          reader = csv.reader(datafile)
+          reader = csv.reader(datafile, quoting = csv.QUOTE_MINIMAL)
           for row in reader: 
             writer.writerow(row)
 
-
     # a messy first guess at derivative generation
     def generate_derivative(self, source_file, output_folder, file_type = "csv", deriv_type = "text",  text_filters = 0, file_category = "images"):
-        """Create a text derivative file from the specified source file.
+        """Create a text or file derivative file from the specified source file.
 
-        Create a text derivative from the specified W/ARC source file, using the output settings specified. 
+        Create a text or file-type derivative from the specified W/ARC source file, using the output settings specified. 
         Args: 
             source_file: the path to the W/ARC file to generatet the derivative from 
             output_folder: the name for the output folder to save the derivative into 
@@ -156,10 +168,17 @@ class DerivativeGenerator:
                                 sub-folder of the working folder)
             file_type: the file format to save the produced derivative in. 
                     Can be either "csv" or "parquet" 
-            text_filters: an integer representing which type of text filtering to apply to the generated derivative. 
+            deriv_type: a string, either "text" for text derivatives or "file" for file type derivatives 
+            text_filters: an integer representing which type of text filtering to apply to the generated derivative. Only applies for deriv_type = "text"
                         0 : return the complete text content of each webpage (with HTML tags removed)
                         1 : return the complete text with HTTP headers removed 
-                        2 : return the text with the boilerplate removed (boilerplate includes nav bars etc) 
+                        2 : return the text with the boilerplate removed (boilerplate includes nav bars etc)
+            file_category: a string representing the type of file derivative to be created. Supported types are: 
+                        "audio", "images", "pdfs", "presentations", "spreadsheets", "videos", and "word processor"
+
+        Raises: 
+          AnalysisException (from pyspark.sql.utils) if file path already exists 
+          Exception if anything else goes wrong and the "_SUCCESS" file is not created in the output directory
         """ 
         # import the AUT (needs to be done after the PySpark set-up)
         from aut import WebArchive, remove_html, remove_http_header, extract_boilerplate
@@ -184,7 +203,6 @@ class DerivativeGenerator:
               .option("escape", "\"") \
               .option("encoding", "utf-8") \
               .save(output_folder)
-        
         elif deriv_type == "file": 
             if file_category == "audio": 
                 # get the audio derivative -- following the format from AUT
@@ -261,8 +279,7 @@ class DerivativeGenerator:
             else: 
               print(f"Unsupported file category: {file_category}. ")
               return False
-            
-        
+
         # rename the datafile to have a meaningful title, remove the success file
         success = False
         # the folder will contain exactly 2 files, a _SUCCESS file and the resulting datafile
@@ -293,7 +310,8 @@ class DerivativeGenerator:
                   os.remove(f.path)
                 else:   
                   os.rename(f.path, output_folder + source_file_name + "." + file_type)
-        return success
+        if not success: 
+           raise Exception()
 
     def display_derivative_creation_options(self): 
         """ Displays a form to set options for derivative file creation. 
@@ -307,15 +325,17 @@ class DerivativeGenerator:
         Also displays a button which, on-click, will run generate_derivative(), 
         passing in the settings specified in the form. 
         """
+        # exception class for PySpark -- thrown often when path is incorrect 
+        from pyspark.sql.utils import AnalysisException 
 
         # file picker for W/ARC files in the specified folder
         data_files = get_files(path, (".warc", ".arc", "warc.gz", ".arc.gz"))
-        file_options = widgets.Dropdown(description="W/ARC file:", options =  data_files)
-        out_text = widgets.Text(description="Output folder:", value="output/")
-        format_choice = widgets.Dropdown(description="Output file type:",options=["csv", "parquet"], value="csv")
+        file_options = widgets.Dropdown(description="W/ARC file", options =  data_files)
+        out_text = widgets.Text(description="Output folder", value="output/")
+        format_choice = widgets.Dropdown(description="Output format",options=["csv", "parquet"], value="csv")
         # text content choices 
         content_options = ["All text content", "Text content without HTTP headers", "Text content without boilerplate"]
-        content_choice = widgets.Dropdown(description="Content:", options=content_options)
+        content_choice = widgets.Dropdown(description="Content", options=content_options)
         content_val = content_options.index(content_choice.value)
         text_button = widgets.Button(description="Create derivative")
 
@@ -323,7 +343,7 @@ class DerivativeGenerator:
         text_deriv_layout = widgets.VBox([file_options, out_text, format_choice, content_choice, text_button])
 
         file_content_options = ["audio", "images", "pdfs", "presentations", "spreadsheets", "videos", "word processor"]
-        file_content_choice = widgets.Dropdown(description="File types:", options = file_content_options)
+        file_content_choice = widgets.Dropdown(description="File types", options = file_content_options)
         file_button = widgets.Button(description="Create derivative")
 
         file_deriv_layout = widgets.VBox([file_options, out_text, format_choice, file_content_choice, file_button])
@@ -331,7 +351,7 @@ class DerivativeGenerator:
 
         # this function is defined here in order to keep the other form elements 
         # in-scope and therefore allow for the reading of their values
-        def btn_create_deriv(btn): 
+        def btn_create_text_deriv(btn): 
             """On-click function for the create derivative button. 
 
             Retrieves the values from the other inputs on the form and passes them to 
@@ -342,10 +362,19 @@ class DerivativeGenerator:
             output_location = path + "/" + out_text.value
             content_val = content_options.index(content_choice.value)
             print("Creating derivative file... (this may take several minutes)")
-            if self.generate_derivative(input_file, output_location, file_type = format_choice.value, deriv_type = "text", text_filters = content_val):
-                print("Derivative generated, saved to: " + output_location)
-            else: 
-                print("An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.")
+
+            try:
+              self.generate_derivative(input_file, output_location, file_type = format_choice.value, deriv_type = "text", text_filters = content_val)
+              print("Derivative generated, saved to: " + output_location)
+            except AnalysisException as e: 
+              # ensure the analysis exception is thrown because of the path existing (update if a better method of checking is found)
+              if "path" in str(e) and "already exists" in str(e):   
+                print("Specified output folder already exists. Please specify a new output folder name.")
+              else: 
+                print(e)
+            except Exception as e:
+               print("An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.")
+               print(f"Error message: {e}")
 
         def btn_create_file_deriv(btn):
            """On-click function for the create file derivative button. 
@@ -355,13 +384,23 @@ class DerivativeGenerator:
             """
            input_file = path + "/" + file_options.value
            output_location = path + "/" + out_text.value
-           print("Creating derivative file... (this may take several minutes)")
-           if self.generate_derivative(input_file, output_location, file_type = format_choice.value, deriv_type = "file", file_category = file_content_choice.value):
-              print("Derivative generated, saved to: " + output_location)
-           else: 
-              print("An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.")
 
-        text_button.on_click(btn_create_deriv)
+           print("Creating derivative file... (this may take several minutes)")
+           try:
+              self.generate_derivative(input_file, output_location, file_type = format_choice.value, deriv_type = "file", file_category = file_content_choice.value )
+              print("Derivative generated, saved to: " + output_location)
+           except AnalysisException as e: 
+              # ensure the analysis exception is thrown because of the path existing (update if a better method of checking is found)
+              if "path" in str(e) and "already exists" in str(e):   
+                print("Specified output folder already exists. Please specify a new output folder name.")
+              else: 
+                print(e)
+           except Exception as e:
+               print("An error occurred while processing the W/ARC. Derivative file may not have been generated successfully.")
+               print(f"Error message: {e}")
+
+        # assign 
+        text_button.on_click(btn_create_text_deriv)
         file_button.on_click(btn_create_file_deriv)
 
         # make the tab display
