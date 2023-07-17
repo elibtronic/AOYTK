@@ -181,7 +181,7 @@ class DerivativeGenerator:
           Exception if anything else goes wrong and the "_SUCCESS" file is not created in the output directory
         """ 
         # import the AUT (needs to be done after the PySpark set-up)
-        from aut import WebArchive, remove_html, remove_http_header, extract_boilerplate
+        from aut import WebArchive, remove_html, remove_http_header, extract_boilerplate, extract_domain
         from pyspark.sql.functions import col, desc
 
         # create our WebArchive object from the W/ARC file
@@ -207,7 +207,7 @@ class DerivativeGenerator:
             if file_category == "audio": 
                 # get the audio derivative -- following the format from AUT
                 archive.audio() \
-                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1") \
+                  .select("crawl_date", extract_domain("url").alias("domain"), "url", "filename", "extension", "md5", "sha1") \
                   .write \
                   .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
                   .format(file_type) \
@@ -218,7 +218,7 @@ class DerivativeGenerator:
             elif file_category == "images": 
                 # get the image derivative -- following the format from AUT
                 archive.images()\
-                  .select("crawl_date", "url", "filename", "extension", "width", "height", "md5", "sha1")\
+                  .select("crawl_date", extract_domain("url").alias("domain"), "url", "filename", "extension", "width", "height", "md5", "sha1")\
                   .write \
                   .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
                   .format(file_type) \
@@ -228,7 +228,7 @@ class DerivativeGenerator:
                 
             elif file_category == "pdfs": 
                 archive.pdfs()\
-                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .select("crawl_date", extract_domain("url").alias("domain"), "url", "filename", "extension", "md5", "sha1")\
                   .write \
                   .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
                   .format(file_type) \
@@ -238,7 +238,7 @@ class DerivativeGenerator:
                 
             elif file_category == "presentations": 
                 archive.presentation_program()\
-                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .select("crawl_date", extract_domain("url").alias("domain"), "url", "filename", "extension", "md5", "sha1")\
                   .write \
                   .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
                   .format(file_type) \
@@ -248,7 +248,7 @@ class DerivativeGenerator:
                 
             elif file_category == "spreadsheets": 
                 archive.spreadsheets()\
-                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .select("crawl_date", extract_domain("url").alias("domain"), "url", "filename", "extension", "md5", "sha1")\
                   .write \
                   .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
                   .format(file_type) \
@@ -258,7 +258,7 @@ class DerivativeGenerator:
                 
             elif file_category == "videos": 
                 archive.video()\
-                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .select("crawl_date", extract_domain("url").alias("domain"), "url", "filename", "extension", "md5", "sha1")\
                   .write \
                   .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
                   .format(file_type) \
@@ -268,7 +268,7 @@ class DerivativeGenerator:
                 
             elif file_category == "word processor":
                 archive.word_processor()\
-                  .select("crawl_date", "url", "filename", "extension", "md5", "sha1")\
+                  .select("crawl_date", extract_domain("url").alias("domain"), "url", "filename", "extension", "md5", "sha1")\
                   .write \
                   .option("timestampFormat", "yyyy/MM/dd HH:mm:ss ZZ") \
                   .format(file_type) \
@@ -302,9 +302,9 @@ class DerivativeGenerator:
                     headers = ["crawl_date", "domain", "url", "content"]
                   elif deriv_type == "file": 
                     if file_category == "images": 
-                       headers = ["crawl_date", "url", "filename", "extension", "width", "height", "md5", "sha1"]
+                       headers = ["crawl_date", "domain", "url", "filename", "extension", "width", "height", "md5", "sha1"]
                     else: 
-                       headers = ["crawl_date", "url", "filename", "extension", "md5", "sha1"]
+                       headers = ["crawl_date", "domain", "url", "filename", "extension", "md5", "sha1"]
                   output_path = output_folder + source_file_name + ".csv"
                   self.create_csv_with_header(headers, f.path, output_path)
                   os.remove(f.path)
