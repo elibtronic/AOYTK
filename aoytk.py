@@ -14,6 +14,10 @@ from wordcloud import WordCloud
 import random
 from pathlib import Path
 
+# specify the docstring format for pdoc
+# for reference: https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings
+__docformat__ = "google"
+
 # Global path variable -- a default for Google Drive usage
 # default path, can be overwritten by the path-setter widget
 path = "/content/drive/MyDrive/AOY/"
@@ -1474,8 +1478,43 @@ class Analyzer:
         display(layout)
         display(out)
 
+    def check_cols(self, require = []): 
+        """Check that certain columns are present in the dataframe.
+        
+        Can be used to ensure that the needed columns for a given function are 
+        present and print a message accordingly. Also checks to ensure data is 
+        loaded. 
+
+        Args:
+            require: The list of column names to require be present in the 
+                dataframe.
+        
+        Returns:
+            True if all required columns are in the dataframe. False otherwise. 
+        """
+        if not self.data_loaded: 
+            print("No data loaded. Load data using the `load_data()` widget "
+                  "before attempting to analyze.")
+            return False
+        missing_cols = []
+        for col in require: 
+            if not col in self.data.columns: 
+                missing_cols.append(col)
+
+        if len(missing_cols) > 0:    
+            print("The following column(s) required for this function "
+                  f"were not found in the loaded data: {', '.join(missing_cols)}")
+            print("Ensure the correct type of derivative file is loaded.")
+            return False
+        return True 
+
     def display_file_summary(self):
         """Prints summary info about a file derivative."""
+
+        # check for required columns 
+        if not self.check_cols(["domain", "extension"]):
+           return 
+
         num_files = len(self.data.index)
         domain_counts = self.data["domain"].value_counts()
         num_domains = len(domain_counts)
@@ -1610,6 +1649,10 @@ class Analyzer:
 
     def same_hash_different_domains(self):
         """Print hashes of files appearing in than one domain, and the domains in which they appear."""
+        
+        if not self.check_cols(["domain", "md5"]):
+            return
+        
         by_md5 = self.data.groupby("md5")
         printed_header = False
         header = "{: <32s}\t{}".format("MD5 Hash", "Domains")
@@ -1698,6 +1741,10 @@ class Analyzer:
 
     def view_image(self):
         """Displays image specified by user input of MD5 hash or URL."""
+        
+        if not self.check_cols(["md5","url"]):
+            return
+        
         # by dropdown
         type_choice = widgets.Dropdown(
             description="By", options=["MD5", "URL"], value="MD5"
@@ -1892,7 +1939,6 @@ class Analyzer:
                 images in
             by_url: Boolean indicating if the "top" occurrances should be
                 determined by URL or MD5 hash
-
         """
         output_folder_path = Path(path + "/" + out_folder)
         if not output_folder_path.exists():
